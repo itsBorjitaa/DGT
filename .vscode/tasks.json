@@ -1,0 +1,34 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Compilar programa DGT",
+            "command": "C:\\MinGW\\bin\\gcc.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${workspaceFolder}/dgt/main.c",
+                "${workspaceFolder}/dgt/database.c",
+                "${workspaceFolder}/dgt/usuario.c",
+                "${workspaceFolder}/dgt/menu.c",
+                "${workspaceFolder}/dgt/sqlite3.c",
+                "-o",
+                "${workspaceFolder}/dgt/programa.exe",
+                "-I${workspaceFolder}/dgt",
+                "-lsqlite3"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/dgt"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Tarea corregida para compilar todos los archivos."
+        }
+    ],
+    "version": "2.0.0"
+}
