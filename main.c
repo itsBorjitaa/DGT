@@ -8,7 +8,7 @@
 // usuarios de prueba:
 //      NOMBRE      CONTRASENA
 //      admin       admin123
-//      usuario1    usuario123
+//      prueba      prueba123
 
 #define MAX_USUARIO 50
 #define MAX_CONTRASENA 50

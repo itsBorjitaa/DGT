@@ -6,12 +6,13 @@
 sqlite3 *db;
 
 void inicializarDB() {
-    int rc = sqlite3_open("db.db", &db);
-    if (rc) {
+    int rc_open = sqlite3_open("db.db", &db);
+    if (rc_open) {
         printf("Error al abrir la base de datos: %s\n", sqlite3_errmsg(db));
         exit(1);
     }
 
+    // crear tabla de usuarios
     char *sql = "CREATE TABLE IF NOT EXISTS usuarios ("
                 "usuario TEXT PRIMARY KEY, "
                 "contrasena TEXT, "
@@ -23,19 +24,40 @@ void inicializarDB() {
                 "telefono TEXT"
                 ");";
     
-    char *errMsg = 0;
-    rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    if (rc != SQLITE_OK) {
-        printf("Error SQL: %s\n", errMsg);
-        sqlite3_free(errMsg);
+    char *errMsg_usuarios = 0;
+    int rc_usuarios = sqlite3_exec(db, sql, 0, 0, &errMsg_usuarios);
+    if (rc_usuarios != SQLITE_OK) {
+        printf("Error SQL: %s\n", errMsg_usuarios);
+        sqlite3_free(errMsg_usuarios);
+    }
+    
+    // crear tabla de vehiculos
+    char *sql_vehiculos = "CREATE TABLE IF NOT EXISTS vehiculos ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "usuario TEXT, "
+        "matricula TEXT UNIQUE, "
+        "marca TEXT, "
+        "modelo TEXT, "
+        "anio INTEGER, "
+        "color TEXT, "
+        "tipo_vehiculo TEXT, "
+        "FOREIGN KEY(usuario) REFERENCES usuarios(usuario)"
+        ");";
+
+    char *errMsg_vehiculos = 0;
+    int rc_vehiculos = sqlite3_exec(db, sql_vehiculos, 0, 0, &errMsg_vehiculos);
+    if (rc_vehiculos != SQLITE_OK) {
+        printf("Error creando tabla de vehiculos: %s\n", errMsg_vehiculos);
+        sqlite3_free(errMsg_vehiculos);
     }
 
     // añade el admin
-    sql = "INSERT OR IGNORE INTO usuarios (usuario, contrasena, rol) VALUES ('admin', 'admin123', 'admin');";
-    rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    if (rc != SQLITE_OK) {
-        printf("Error al insertar admin: %s\n", errMsg);
-        sqlite3_free(errMsg);
+    char *sql_admin = "INSERT OR IGNORE INTO usuarios (usuario, contrasena, rol) VALUES ('admin', 'admin123', 'admin');";
+    char *errMsg_admin = 0;
+    int rc_admin = sqlite3_exec(db, sql_admin, 0, 0, &errMsg_admin);
+    if (rc_admin != SQLITE_OK) {
+        printf("Error al insertar admin: %s\n", errMsg_admin);
+        sqlite3_free(errMsg_admin);
     }
 }
 
