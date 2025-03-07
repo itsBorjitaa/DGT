@@ -6,19 +6,25 @@
 
 #define MAX_INPUT 100
 
-// Variable global para almacenar el usuario actual
+// variable global para almacenar el usuario actual
 extern char usuarioActual[50];
 
 void menuInicial() {
     int opcion;
     do {
-        printf("\n--- Sistema de Gestion DGT ---\n");
+        //printf("██████   ██████  ████████ ");
+        //printf("██   ██ ██          ██    ");
+        //printf("██   ██ ██   ███    ██    ");
+        //printf("██   ██ ██    ██    ██    ");
+        //printf("██████   ██████     ██    ");
+        //printf("                          ");
+        printf("\n--- DGT ---\n");
         printf("1. Iniciar sesion\n");
         printf("2. Registrarse\n");
         printf("0. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
-        getchar(); // Limpiar buffer
+        getchar(); // limpiar buffer
 
         switch (opcion) {
             case 1:
@@ -112,7 +118,9 @@ void menuUsuario() {
         printf("1. Consultar datos personales\n");
         printf("2. Consultar datos de vehiculos\n");
         printf("3. Modificar informacion de vehiculo\n");
-        printf("4. Anadir nuevo vehiculo\n");
+        printf("4. Aniadir nuevo vehiculo\n");
+        printf("5. Consultar mis multas\n");
+        printf("6. Pagar multa\n");
         printf("0. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
@@ -122,6 +130,8 @@ void menuUsuario() {
             case 2: consultarDatosVehiculos(); break;
             case 3: modificarInformacionVehiculo(); break;
             case 4: agregarNuevoVehiculo(); break;
+            case 5: consultarMultasUsuario(); break;
+            case 6: pagarMultaUsuario(); break;
             case 0: printf("Saliendo de la vista de usuario...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }
@@ -134,6 +144,9 @@ void menuAdministrador() {
         printf("\n--- Vista de Administrador ---\n");
         printf("1. Consultar todos los usuarios\n");
         printf("2. Consultar todos los vehiculos\n");
+        printf("3. Consultar todas las multas\n");
+        printf("4. Aniadir multa\n");
+        printf("5. Cambiar estado de multa\n");
         printf("0. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
@@ -141,6 +154,9 @@ void menuAdministrador() {
         switch (opcion) {
             case 1: consultarTodosLosUsuarios(); break;
             case 2: consultarTodosLosVehiculos(); break;
+            case 3: consultarMultasAdmin(); break;
+            case 4: agregarMultaAdmin(); break;
+            case 5: cambiarEstadoMulta(); break;
             case 0: printf("Saliendo de la vista de administrador...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "database.h"
 #include "menu.h"
+#include <time.h>
 
 // para compilar todo: gcc main.c database.c usuario.c menu.c sqlite3.c -o main
 // para ejecutar .exe: ./main.exe

@@ -8,5 +8,10 @@ void agregarNuevoVehiculo();
 void consultarTodosLosUsuarios();
 void consultarTodosLosVehiculos();
 void obtenerDatosPersonales(char *usuario);
+void consultarMultasAdmin();
+void agregarMultaAdmin();
+void cambiarEstadoMulta();
+void consultarMultasUsuario();
+void pagarMultaUsuario();
 
 #endif
