@@ -72,6 +72,8 @@ void menuRegistro() {
     char usuario[MAX_INPUT], contrasena[MAX_INPUT];
     char nombre[MAX_INPUT], apellidos[MAX_INPUT], dni[MAX_INPUT];
     char email[MAX_INPUT], telefono[MAX_INPUT];
+    int n[MAX_INPUT];
+    char rol;
 
     printf("\n--- Registro de Usuario ---\n");
     
@@ -85,6 +87,20 @@ void menuRegistro() {
     
     printf("Contrasena: ");
     scanf("%s", contrasena);
+    
+
+    printf("Rol: ");
+    scanf("%d", n);
+    printf("0. Seleccionar Admin\n");
+    printf("1. Seleccionar Usuario\n");
+    scanf("%d", n);
+    if (n == 1){
+        rol = "usuario";
+    }
+    else if (n == 0)
+    {
+        rol = "admin";
+    }
     
     getchar(); // limpiar buffer
     
@@ -107,7 +123,7 @@ void menuRegistro() {
     printf("Telefono: ");
     scanf("%s", telefono);
 
-    if (registrarUsuario(usuario, contrasena, nombre, apellidos, dni, email, telefono)) {
+    if (registrarUsuario(usuario, contrasena, rol, nombre, apellidos, dni, email, telefono)) {
         printf("Usuario registrado correctamente.\n");
     } else {
         printf("Error al registrar el usuario.\n");

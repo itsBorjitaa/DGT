@@ -120,7 +120,7 @@ int existeUsuario(char *usuario) {
     return existe;
 }
 
-int registrarUsuario(char *usuario, char *contrasena, char *nombre, char *apellidos, char *dni, char *email, char *telefono) {
+int registrarUsuario(char *usuario, char *contrasena, char *rol, char *nombre, char *apellidos, char *dni, char *email, char *telefono) {
     if (existeUsuario(usuario)) {
         printf("El usuario ya existe.\n");
         return 0;
@@ -130,8 +130,8 @@ int registrarUsuario(char *usuario, char *contrasena, char *nombre, char *apelli
     char sql[500];
     
     sprintf(sql, "INSERT INTO usuarios (usuario, contrasena, rol, nombre, apellidos, dni, email, telefono) "
-                 "VALUES ('%s', '%s', 'usuario', '%s', '%s', '%s', '%s', '%s');", 
-            usuario, contrasena, nombre, apellidos, dni, email, telefono);
+                 "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
+            usuario, contrasena, rol, nombre, apellidos, dni, email, telefono);
     
     int rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
     if (rc != SQLITE_OK) {
