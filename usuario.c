@@ -74,8 +74,3 @@ void consultarTodosLosUsuarios() {
     
     sqlite3_finalize(stmt);
 }
-
-void obtenerDatosPersonales(char *usuario) {
-    // esta funcion ya no es necesaria ya que su funcionalidad esta incorporada en consultarDatosUsuario
-    // se mantiene la declaración para evitar errores de compilación
-}

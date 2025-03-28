@@ -2,6 +2,9 @@
 #include <string.h>
 #include "menu.h"
 #include "usuario.h"
+#include "accidente.h"
+#include "multa.h"
+#include "vehiculo.h"
 #include "database.h"
 
 #define MAX_INPUT 100
