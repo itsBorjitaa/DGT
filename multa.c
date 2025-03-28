@@ -204,6 +204,7 @@ void consultarMultasUsuario() {
     }
     
     sqlite3_finalize(stmt);
+
 }
 
 void pagarMultaUsuario() {
@@ -244,12 +245,10 @@ void pagarMultaUsuario() {
     
     if (!multa_existe) {
         printf("La multa con ID %d no existe o no te pertenece.\n", id_multa);
-        return;
     }
     
     if (ya_pagada) {
         printf("Esta multa ya está pagada.\n");
-        return;
     }
     
     // obtiene fecha actual para calcular descuento
@@ -280,4 +279,5 @@ void pagarMultaUsuario() {
     } else {
         printf("Operacion cancelada.\n");
     }
+
 }

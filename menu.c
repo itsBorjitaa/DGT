@@ -72,8 +72,7 @@ void menuRegistro() {
     char usuario[MAX_INPUT], contrasena[MAX_INPUT];
     char nombre[MAX_INPUT], apellidos[MAX_INPUT], dni[MAX_INPUT];
     char email[MAX_INPUT], telefono[MAX_INPUT];
-    int n[MAX_INPUT];
-    char rol;
+    char rol[10]; // Variable para almacenar el rol
 
     printf("\n--- Registro de Usuario ---\n");
     
@@ -88,19 +87,22 @@ void menuRegistro() {
     printf("Contrasena: ");
     scanf("%s", contrasena);
     
+    int n;
+    do {
+        printf("Seleccione Rol:\n");
+        printf("0. Seleccionar Admin\n");
+        printf("1. Seleccionar Usuario\n");
+        printf("Introduzca la opción: ");
+        scanf("%d", &n);
 
-    printf("Rol: ");
-    scanf("%d", n);
-    printf("0. Seleccionar Admin\n");
-    printf("1. Seleccionar Usuario\n");
-    scanf("%d", n);
-    if (n == 1){
-        rol = "usuario";
-    }
-    else if (n == 0)
-    {
-        rol = "admin";
-    }
+        if (n == 0) {
+            strcpy(rol, "admin");  // Asignar cadena a rol
+        } else if (n == 1) {
+            strcpy(rol, "usuario");  // Asignar cadena a rol
+        } else {
+            printf("Opcion no valida. Intente de nuevo.\n");
+        }
+    } while (n != 0 && n != 1);
     
     getchar(); // limpiar buffer
     
