@@ -151,8 +151,8 @@ void menuUsuario() {
             case 2: consultarDatosVehiculos(); break;
             case 3: modificarInformacionVehiculo(); break;
             case 4: agregarNuevoVehiculo(); break;
-            case 5: consultarMultasUsuario(); break;
-            case 6: pagarMultaUsuario(); break;
+            //case 5: consultarMultasUsuario(); break;      // los identifica como int
+            //case 6: pagarMultaUsuario(); break;
             case 0: printf("Saliendo de la vista de usuario...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }
@@ -175,9 +175,9 @@ void menuAdministrador() {
         switch (opcion) {
             case 1: consultarTodosLosUsuarios(); break;
             case 2: consultarTodosLosVehiculos(); break;
-            case 3: consultarMultasAdmin(); break;
-            case 4: agregarMultaAdmin(); break;
-            case 5: cambiarEstadoMulta(); break;
+            //case 3: consultarMultasAdmin(); break;
+            //case 4: agregarMultaAdmin(); break;
+            //case 5: cambiarEstadoMulta(); break;
             case 0: printf("Saliendo de la vista de administrador...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }
