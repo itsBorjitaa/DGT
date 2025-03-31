@@ -33,6 +33,7 @@ void menuInicial() {
                 break;
             case 0:
                 printf("Saliendo del sistema...\n");
+                registrarAccion(usuarioActual, "Saliendo del sistema.");
                 break;
             default:
                 printf("Opcion no valida. Intente de nuevo.\n");
@@ -78,6 +79,7 @@ void menuRegistro() {
     
     if (existeUsuario(usuario)) {
         printf("El nombre de usuario ya existe. Por favor, elija otro.\n");
+        registrarAccion("Sistema", "Intento fallido de registro: usuario ya existente");
         return;
     }
     
@@ -124,10 +126,13 @@ void menuRegistro() {
 
     if (registrarUsuario(usuario, contrasena, rol, nombre, apellidos, dni, email, telefono)) {
         printf("Usuario registrado correctamente.\n");
+        registrarAccion(usuario, "Se registró correctamente en el sistema");
     } else {
         printf("Error al registrar el usuario.\n");
+        registrarAccion(usuario, "Error al registrarse en el sistema");
     }
 }
+
 
 void menuUsuario() {
     int opcion;

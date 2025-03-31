@@ -3,6 +3,7 @@
 #include "multa.h"
 #include "database.h"
 #include <time.h>
+#include "logger.h"
 
 // variable global para guardar el usuario actual
 extern char usuarioActual[50];
@@ -204,7 +205,9 @@ void consultarMultasUsuario() {
     
     sqlite3_finalize(stmt);
 
+    registrarAccion(usuarioActual, "Consultó sus multas.");
 }
+
 
 void pagarMultaUsuario() {
     int id_multa;
@@ -272,11 +275,13 @@ void pagarMultaUsuario() {
     if (confirmar) {
         if (pagarMulta(id_multa, fecha_actual)) {
             printf("Multa pagada correctamente. Se ha registrado el pago con fecha %s.\n", fecha_actual);
+
+            // Registrar la acción en el log
+            registrarAccion(usuarioActual, "Pagó una multa.");
         } else {
             printf("Error al procesar el pago de la multa.\n");
         }
     } else {
         printf("Operacion cancelada.\n");
     }
-
 }

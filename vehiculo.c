@@ -2,6 +2,7 @@
 #include <string.h>
 #include "database.h"
 #include "vehiculo.h"
+#include "logger.h"
 
 #define MAX_INPUT 100
 // variable global para guardar el usuario actual
@@ -41,10 +42,14 @@ void consultarDatosVehiculos() {
     }
     
     sqlite3_finalize(stmt);
+
+    registrarAccion(usuarioActual, "Consultó sus datos de vehículos.");
 }
+
 
 void modificarInformacionVehiculo() {
     printf("Modificando informacion del vehiculo...\n");
+    registrarAccion(usuarioActual, "Modificó la información de un vehículo.");
 }
 
 void agregarNuevoVehiculo() {
@@ -135,6 +140,10 @@ void agregarNuevoVehiculo() {
         sqlite3_free(errMsg);
     } else {
         printf("Vehiculo registrado correctamente.\n");
+
+        char mensaje_log[200];
+        sprintf(mensaje_log, "Agregó un nuevo vehículo con matrícula %s", matricula);
+        registrarAccion(usuarioActual, mensaje_log);
     }
 }
 
