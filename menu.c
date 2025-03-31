@@ -157,11 +157,29 @@ void menuUsuario() {
         scanf("%d", &opcion);
 
         switch (opcion) {
-            case 1: consultarDatosUsuario(); break;
-            case 2: consultarDatosVehiculos(); break;
+            case 1:  do {
+                consultarDatosUsuario(); 
+                printf("\nPresione 9 para volver al menu: ");
+                scanf("%d", &opcion);
+                getchar(); 
+            } while (opcion != 9); 
+            break;
+            case 2: do {
+                consultarDatosVehiculos();
+                printf("\nPresione 9 para volver al menu: ");
+                scanf("%d", &opcion);
+                getchar(); 
+            } while (opcion != 9); 
+            break;
             case 3: modificarInformacionVehiculo(); break;
             case 4: agregarNuevoVehiculo(); break;
-            case 5: consultarMultasUsuario(); break;
+            case 5:  do {
+                consultarMultasUsuario();
+                printf("\nPresione 9 para volver al menu: ");
+                scanf("%d", &opcion);
+                getchar(); 
+            } while (opcion != 9);
+            break;
             case 6: pagarMultaUsuario(); break;
             case 7: guardarDatosUsuarioEnTXT(); break;
             case 0: printf("Saliendo de la vista de usuario...\n"); 
