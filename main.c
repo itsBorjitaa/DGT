@@ -3,8 +3,8 @@
 #include "database.h"
 #include "menu.h"
 #include <time.h>
-// commit igor
-// para compilar todo: gcc main.c database.c usuario.c menu.c sqlite3.c -o main
+
+// para compilar todo: gcc main.c database.c usuario.c accidente.c multa.c vehiculo.c menu.c sqlite3.c -o main
 // para ejecutar .exe: ./main.exe
 // usuarios de prueba:
 //      NOMBRE      CONTRASENA

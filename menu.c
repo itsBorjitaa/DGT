@@ -15,19 +15,13 @@ extern char usuarioActual[50];
 void menuInicial() {
     int opcion;
     do {
-        //printf("██████   ██████  ████████ ");
-        //printf("██   ██ ██          ██    ");
-        //printf("██   ██ ██   ███    ██    ");
-        //printf("██   ██ ██    ██    ██    ");
-        //printf("██████   ██████     ██    ");
-        //printf("                          ");
         printf("\n--- DGT ---\n");
         printf("1. Iniciar sesion\n");
         printf("2. Registrarse\n");
         printf("0. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
-        getchar(); // limpiar buffer
+        getchar();
 
         switch (opcion) {
             case 1:
@@ -55,7 +49,6 @@ void menuInicioSesion() {
     scanf("%s", contrasena);
 
     if (verificarCredenciales(usuario, contrasena, rol)) {
-        // Guardar el usuario actual en la variable global
         strcpy(usuarioActual, usuario);
         
         if (strcmp(rol, "usuario") == 0) {
@@ -72,7 +65,7 @@ void menuRegistro() {
     char usuario[MAX_INPUT], contrasena[MAX_INPUT];
     char nombre[MAX_INPUT], apellidos[MAX_INPUT], dni[MAX_INPUT];
     char email[MAX_INPUT], telefono[MAX_INPUT];
-    char rol[10]; // Variable para almacenar el rol
+    char rol[10];
 
     printf("\n--- Registro de Usuario ---\n");
     
@@ -96,19 +89,19 @@ void menuRegistro() {
         scanf("%d", &n);
 
         if (n == 0) {
-            strcpy(rol, "admin");  // Asignar cadena a rol
+            strcpy(rol, "admin"); 
         } else if (n == 1) {
-            strcpy(rol, "usuario");  // Asignar cadena a rol
+            strcpy(rol, "usuario");
         } else {
             printf("Opcion no valida. Intente de nuevo.\n");
         }
     } while (n != 0 && n != 1);
     
-    getchar(); // limpiar buffer
-    
+    getchar();
+
     printf("Nombre: ");
     fgets(nombre, MAX_INPUT, stdin);
-    nombre[strcspn(nombre, "\n")] = 0; // eliminar salto de linea
+    nombre[strcspn(nombre, "\n")] = 0;
     
     printf("Apellidos: ");
     fgets(apellidos, MAX_INPUT, stdin);
@@ -117,7 +110,7 @@ void menuRegistro() {
     printf("DNI: ");
     scanf("%s", dni);
     
-    getchar(); // limpiar buffer
+    getchar(); 
     
     printf("Email: ");
     scanf("%s", email);
@@ -151,8 +144,8 @@ void menuUsuario() {
             case 2: consultarDatosVehiculos(); break;
             case 3: modificarInformacionVehiculo(); break;
             case 4: agregarNuevoVehiculo(); break;
-            //case 5: consultarMultasUsuario(); break;      // los identifica como int
-            //case 6: pagarMultaUsuario(); break;
+            case 5: consultarMultasUsuario(); break;
+            case 6: pagarMultaUsuario(); break;
             case 0: printf("Saliendo de la vista de usuario...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }
@@ -175,9 +168,9 @@ void menuAdministrador() {
         switch (opcion) {
             case 1: consultarTodosLosUsuarios(); break;
             case 2: consultarTodosLosVehiculos(); break;
-            //case 3: consultarMultasAdmin(); break;
-            //case 4: agregarMultaAdmin(); break;
-            //case 5: cambiarEstadoMulta(); break;
+            case 3: consultarMultasAdmin(); break;
+            case 4: agregarMultaAdmin(); break;
+            case 5: cambiarEstadoMulta(); break;
             case 0: printf("Saliendo de la vista de administrador...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }

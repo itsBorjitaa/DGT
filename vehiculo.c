@@ -99,7 +99,7 @@ void agregarNuevoVehiculo() {
         return;
     }
 
-    getchar(); // limpia buffer
+    getchar();
     
     printf("Marca: ");
     fgets(marca, MAX_INPUT, stdin);
@@ -112,7 +112,7 @@ void agregarNuevoVehiculo() {
     printf("Anio: ");
     scanf("%d", &anio);
     
-    getchar(); // limpia buffer
+    getchar();
     
     printf("Color: ");
     fgets(color, MAX_INPUT, stdin);
@@ -122,7 +122,6 @@ void agregarNuevoVehiculo() {
     fgets(tipo_vehiculo, MAX_INPUT, stdin);
     tipo_vehiculo[strcspn(tipo_vehiculo, "\n")] = 0;
 
-    // prepara consulta de inserción
     char sql[500];
     char *errMsg = 0;
     

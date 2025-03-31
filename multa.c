@@ -56,7 +56,7 @@ void agregarMultaAdmin() {
     
     printf("Ingrese el DNI del infractor: ");
     scanf("%s", dni);
-    getchar(); // limpiar buffer
+    getchar();
     
     // verifica si el DNI existe
     char sql_check[200];
@@ -107,7 +107,7 @@ void cambiarEstadoMulta() {
     printf("ID de la multa: ");
     scanf("%d", &id_multa);
     
-    // Verificar si la multa existe
+    // verifica si la multa existe
     char sql_check[200];
     sprintf(sql_check, "SELECT pagada FROM multas WHERE id=%d", id_multa);
     
@@ -182,7 +182,6 @@ void consultarMultasUsuario() {
         double importe_actual = importe_original;
         char info_descuento[50] = "";
         
-        // Si no está pagada y estamos dentro del plazo de descuento
         if (!pagada && strcmp(fecha_actual, fecha_limite) <= 0) {
             importe_actual = importe_original * 0.5;
             sprintf(info_descuento, " (%.2f con desc.)", importe_actual);
@@ -222,7 +221,7 @@ void pagarMultaUsuario() {
     printf("ID de la multa a pagar: ");
     scanf("%d", &id_multa);
     
-    // Verificar si la multa existe y pertenece al usuario
+    // verifica si la multa existe y pertenece al usuario
     char sql_check[200];
     sprintf(sql_check, "SELECT pagada, importe, fecha_limite_descuento FROM multas WHERE id=%d AND dni='%s'", id_multa, dni);
     

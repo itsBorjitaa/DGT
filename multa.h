@@ -1,5 +1,5 @@
-#ifndef USUARIO_H
-#define USUARIO_H
+#ifndef MULTA_H
+#define MULTA_H
 
 void consultarMultasAdmin();
 void agregarMultaAdmin();
