@@ -6,6 +6,7 @@
 #include "multa.h"
 #include "vehiculo.h"
 #include "database.h"
+#include "logger.h"
 
 #define MAX_INPUT 100
 
@@ -50,7 +51,8 @@ void menuInicioSesion() {
 
     if (verificarCredenciales(usuario, contrasena, rol)) {
         strcpy(usuarioActual, usuario);
-        
+        registrarAccion(usuarioActual, "Inicio de sesion exitoso");
+
         if (strcmp(rol, "usuario") == 0) {
             menuUsuario();
         } else if (strcmp(rol, "admin") == 0) {
@@ -58,8 +60,10 @@ void menuInicioSesion() {
         }
     } else {
         printf("Credenciales incorrectas.\n");
+        registrarAccion(usuario, "Intento fallido de inicio de sesion");
     }
 }
+
 
 void menuRegistro() {
     char usuario[MAX_INPUT], contrasena[MAX_INPUT];

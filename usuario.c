@@ -3,6 +3,7 @@
 #include "usuario.h"
 #include "database.h"
 #include <time.h>
+#include "logger.h"
 
 // variable global para guardar el usuario actual
 extern char usuarioActual[50];
@@ -121,4 +122,7 @@ void guardarDatosUsuarioEnTXT() {
     
     sqlite3_finalize(stmt);
     fclose(archivo);
+
+    printf("Datos exportados correctamente a %s\n", nombreArchivo);
+    registrarAccion(usuarioActual, "Exportó sus datos a un archivo TXT");
 }

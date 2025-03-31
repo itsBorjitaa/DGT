@@ -4,7 +4,7 @@
 #include "menu.h"
 #include <time.h>
 
-// para compilar todo: gcc main.c database.c usuario.c accidente.c multa.c vehiculo.c menu.c sqlite3.c -o main
+// para compilar todo: gcc main.c database.c usuario.c accidente.c multa.c vehiculo.c menu.c logger.c sqlite3.c -o main
 // para ejecutar .exe: ./main.exe
 // usuarios de prueba:
 //      NOMBRE      CONTRASENA
