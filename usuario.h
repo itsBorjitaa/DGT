@@ -3,5 +3,7 @@
 
 void consultarDatosUsuario();
 void consultarTodosLosUsuarios();
+void guardarDatosUsuarioEnTXT();
+
 
 #endif

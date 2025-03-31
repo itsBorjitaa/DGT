@@ -74,3 +74,51 @@ void consultarTodosLosUsuarios() {
     
     sqlite3_finalize(stmt);
 }
+
+void guardarDatosUsuarioEnTXT() {
+    char nombreArchivo[100];
+    printf("Introduzca el nombre con el que desea guardar el archivo (sin extension): ");
+    scanf("%99s", nombreArchivo);
+    strcat(nombreArchivo, ".txt");
+
+    FILE *archivo = fopen(nombreArchivo, "w");
+    if (archivo == NULL) {
+        printf("Error al crear el archivo.\n");
+        return;
+    }
+
+    char sql[200];
+    sprintf(sql, "SELECT nombre, apellidos, dni, email, telefono FROM usuarios WHERE usuario = ?");
+    
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (rc != SQLITE_OK) {
+        printf("Error preparando consulta de datos personales: %s\n", sqlite3_errmsg(db));
+        fclose(archivo);
+        return;
+    }
+    
+    rc = sqlite3_bind_text(stmt, 1, usuarioActual, -1, SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        printf("Error vinculando parametro de usuario: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        fclose(archivo);
+        return;
+    }
+    
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ROW) {
+        fprintf(archivo, "--- Datos Personales ---\n");
+        fprintf(archivo, "Nombre: %s\n", sqlite3_column_text(stmt, 0) ? (char*)sqlite3_column_text(stmt, 0) : "N/A");
+        fprintf(archivo, "Apellidos: %s\n", sqlite3_column_text(stmt, 1) ? (char*)sqlite3_column_text(stmt, 1) : "N/A");
+        fprintf(archivo, "DNI: %s\n", sqlite3_column_text(stmt, 2) ? (char*)sqlite3_column_text(stmt, 2) : "N/A");
+        fprintf(archivo, "Email: %s\n", sqlite3_column_text(stmt, 3) ? (char*)sqlite3_column_text(stmt, 3) : "N/A");
+        fprintf(archivo, "Telefono: %s\n", sqlite3_column_text(stmt, 4) ? (char*)sqlite3_column_text(stmt, 4) : "N/A");
+        printf("Datos guardados en %s\n", nombreArchivo);
+    } else {
+        printf("No se encontraron datos personales para este usuario.\n");
+    }
+    
+    sqlite3_finalize(stmt);
+    fclose(archivo);
+}

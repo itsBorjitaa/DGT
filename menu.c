@@ -135,6 +135,7 @@ void menuUsuario() {
         printf("4. Aniadir nuevo vehiculo\n");
         printf("5. Consultar mis multas\n");
         printf("6. Pagar multa\n");
+        printf("7. Exportar datos\n");
         printf("0. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
@@ -146,6 +147,7 @@ void menuUsuario() {
             case 4: agregarNuevoVehiculo(); break;
             case 5: consultarMultasUsuario(); break;
             case 6: pagarMultaUsuario(); break;
+            case 7: guardarDatosUsuarioEnTXT(); break;
             case 0: printf("Saliendo de la vista de usuario...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }
