@@ -34,6 +34,13 @@ void menuInicial() {
             case 0:
                 printf("Saliendo del sistema...\n");
                 registrarAccion(usuarioActual, "Saliendo del sistema.");
+                // Limpiar el archivo de log (borrar contenido)
+                FILE *logFile = fopen("log.txt", "w"); 
+                if (logFile == NULL) {
+                    printf("Error al abrir el archivo de log para limpiar.\n");
+                } else {
+                    fclose(logFile); 
+                }
                 break;
             default:
                 printf("Opcion no valida. Intente de nuevo.\n");
@@ -157,7 +164,9 @@ void menuUsuario() {
             case 5: consultarMultasUsuario(); break;
             case 6: pagarMultaUsuario(); break;
             case 7: guardarDatosUsuarioEnTXT(); break;
-            case 0: printf("Saliendo de la vista de usuario...\n"); break;
+            case 0: printf("Saliendo de la vista de usuario...\n"); 
+            registrarAccion(usuarioActual, "Usuario salió del menu");
+            break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }
     } while (opcion != 0);
