@@ -68,6 +68,12 @@ void consultarAccidentesUsuario(char *usuario) {
     sqlite3_finalize(stmt);
 }
 
+int obtenerAnioActual() {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    return tm.tm_year + 1900;
+}
+
 int esAnioBisiesto(int anio) {
     return (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
 }
@@ -79,8 +85,10 @@ int validarFecha(const char *fecha) {
         return 0; 
     }
 
+    int anioActual = obtenerAnioActual();
+
     // Año de 4 dígitos y dentro de un rango válido
-    if (anio < 1900 || anio > 2100) {
+    if (anio < 1900 || anio > anioActual) {
         return 0;
     }
 
