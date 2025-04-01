@@ -45,13 +45,13 @@ void consultarDatosVehiculos() {
     
     sqlite3_finalize(stmt);
 
-    registrarAccion(usuarioActual, "Consultó sus datos de vehículos.");
+    registrarAccion(usuarioActual, "Consulto sus datos de vehículos.");
 }
 
 
 void modificarInformacionVehiculo() {
     printf("Modificando informacion del vehiculo...\n");
-    registrarAccion(usuarioActual, "Modificó la informacion de un vehículo.");
+    registrarAccion(usuarioActual, "Modifico la informacion de un vehículo.");
 }
 
 int validarMatricula(const char *matricula) {
@@ -207,7 +207,7 @@ void agregarNuevoVehiculo() {
         printf("Vehiculo registrado correctamente.\n");
 
         char mensaje_log[200];
-        sprintf(mensaje_log, "Agregó un nuevo vehículo con matrícula %s", matricula);
+        sprintf(mensaje_log, "Agrego un nuevo vehículo con matrícula %s", matricula);
         registrarAccion(usuarioActual, mensaje_log);
     }
 }
