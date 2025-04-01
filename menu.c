@@ -98,7 +98,7 @@ void menuRegistro() {
         printf("Seleccione Rol:\n");
         printf("0. Seleccionar Admin\n");
         printf("1. Seleccionar Usuario\n");
-        printf("Introduzca la opción: ");
+        printf("Introduzca la opcion: ");
         scanf("%d", &n);
 
         if (n == 0) {
@@ -133,7 +133,7 @@ void menuRegistro() {
 
     if (registrarUsuario(usuario, contrasena, rol, nombre, apellidos, dni, email, telefono)) {
         printf("Usuario registrado correctamente.\n");
-        registrarAccion(usuario, "Se registró correctamente en el sistema");
+        registrarAccion(usuario, "Se registro correctamente en el sistema");
     } else {
         printf("Error al registrar el usuario.\n");
         registrarAccion(usuario, "Error al registrarse en el sistema");
@@ -152,6 +152,8 @@ void menuUsuario() {
         printf("5. Consultar mis multas\n");
         printf("6. Pagar multa\n");
         printf("7. Exportar datos\n");
+        printf("8. Registrar un accidente\n");
+        printf("9. Consultar mis accidentes\n");
         printf("0. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
@@ -182,8 +184,20 @@ void menuUsuario() {
             break;
             case 6: pagarMultaUsuario(); break;
             case 7: guardarDatosUsuarioEnTXT(); break;
+            case 8: {
+                char fecha[20], descripcion[200];
+                printf("Fecha del accidente (YYYY-MM-DD): ");
+                scanf("%s", fecha);
+                getchar();
+                printf("Descripcion del accidente: ");
+                fgets(descripcion, sizeof(descripcion), stdin);
+                descripcion[strcspn(descripcion, "\n")] = 0;
+                registrarAccidente(usuarioActual, fecha, descripcion);
+                break;
+            }
+            case 9: consultarAccidentesUsuario(usuarioActual); break;
             case 0: printf("Saliendo de la vista de usuario...\n"); 
-            registrarAccion(usuarioActual, "Usuario salió del menu");
+            registrarAccion(usuarioActual, "Usuario salio del menu");
             break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }
@@ -199,6 +213,7 @@ void menuAdministrador() {
         printf("3. Consultar todas las multas\n");
         printf("4. Aniadir multa\n");
         printf("5. Cambiar estado de multa\n");
+        printf("6. Consultar datos de un accidente\n");
         printf("0. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
@@ -209,6 +224,13 @@ void menuAdministrador() {
             case 3: consultarMultasAdmin(); break;
             case 4: agregarMultaAdmin(); break;
             case 5: cambiarEstadoMulta(); break;
+            case 6: {
+                int idAccidente;
+                printf("Ingrese el ID del accidente a consultar: ");
+                scanf("%d", &idAccidente);
+                consultarDatosAccidente(idAccidente);
+                break;
+            }
             case 0: printf("Saliendo de la vista de administrador...\n"); break;
             default: printf("Opcion no valida. Intente de nuevo.\n");
         }

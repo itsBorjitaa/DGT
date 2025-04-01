@@ -12,7 +12,7 @@ extern sqlite3 *db;
 
 void consultarDatosUsuario() {
     printf("Consultando datos del usuario...\n");
-    registrarAccion(usuarioActual, "Consultó sus datos personales");
+    registrarAccion(usuarioActual, "Consulto sus datos personales");
     
     char sql[200];
     sprintf(sql, "SELECT nombre, apellidos, dni, email, telefono FROM usuarios WHERE usuario = ?");
@@ -50,7 +50,7 @@ void consultarDatosUsuario() {
 
 void consultarTodosLosUsuarios() {
     printf("Consultando todos los usuarios...\n");
-    registrarAccion(usuarioActual, "Consultó la lista de todos los usuarios");
+    registrarAccion(usuarioActual, "Consulto la lista de todos los usuarios");
     
     char sql[] = "SELECT usuario, nombre, apellidos, dni, email, telefono FROM usuarios";
     
@@ -90,7 +90,7 @@ void guardarDatosUsuarioEnTXT() {
         return;
     }
 
-    registrarAccion(usuarioActual, "Exportó sus datos a un archivo TXT");
+    registrarAccion(usuarioActual, "Exporto sus datos a un archivo TXT");
 
     // Datos
     char sql[200];

@@ -11,5 +11,6 @@ int agregarMulta(char *dni, char *concepto, char *fecha_delito, double importe, 
 char* obtenerDNI(char *usuario, char *dni_buffer);
 int pagarMulta(int id_multa, char *fecha_pago);
 double calcularImporte(int id_multa, char *fecha_actual);
+int registrarAccidente(char *usuario, char *fecha, char *descripcion);
 
 #endif

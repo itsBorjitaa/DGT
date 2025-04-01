@@ -205,7 +205,7 @@ void consultarMultasUsuario() {
     
     sqlite3_finalize(stmt);
 
-    registrarAccion(usuarioActual, "Consultó sus multas.");
+    registrarAccion(usuarioActual, "Consulto sus multas.");
 }
 
 
@@ -277,7 +277,7 @@ void pagarMultaUsuario() {
             printf("Multa pagada correctamente. Se ha registrado el pago con fecha %s.\n", fecha_actual);
 
             // Registrar la acción en el log
-            registrarAccion(usuarioActual, "Pagó una multa.");
+            registrarAccion(usuarioActual, "Pago una multa.");
         } else {
             printf("Error al procesar el pago de la multa.\n");
         }

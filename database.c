@@ -79,6 +79,24 @@ void inicializarDB() {
         printf("Error al insertar admin: %s\n", errMsg_admin);
         sqlite3_free(errMsg_admin);
     }
+
+    // Crear tabla de accidentes
+    char *sql_accidentes = "CREATE TABLE IF NOT EXISTS accidentes ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "usuario TEXT, "
+        "fecha TEXT, "
+        "descripcion TEXT, "
+        "FOREIGN KEY(usuario) REFERENCES usuarios(usuario)"
+        ");";
+    sqlite3_exec(db, sql_accidentes, 0, 0, 0);
+
+    char *errMsg_accidentes = 0;
+    int rc_accidentes = sqlite3_exec(db, sql_accidentes, 0, 0, &errMsg_accidentes);
+    if (rc_accidentes != SQLITE_OK) {
+        printf("Error creando tabla de accidentes: %s\n", errMsg_accidentes);
+        sqlite3_free(errMsg_accidentes);
+    }
+
 }
 
 int verificarCredenciales(char *usuario, char *contrasena, char *rol) {
@@ -229,4 +247,10 @@ double calcularImporte(int id_multa, char *fecha_actual) {
     
     sqlite3_finalize(stmt);
     return importe;
+}
+
+int registrarAccidente(char *usuario, char *fecha, char *descripcion) {
+    char sql[500];
+    sprintf(sql, "INSERT INTO accidentes (usuario, fecha, descripcion) VALUES ('%s', '%s', '%s');", usuario, fecha, descripcion);
+    return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
