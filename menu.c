@@ -193,9 +193,16 @@ void menuUsuario() {
                 fgets(descripcion, sizeof(descripcion), stdin);
                 descripcion[strcspn(descripcion, "\n")] = 0;
                 registrarAccidente(usuarioActual, fecha, descripcion);
+                registrarAccion(usuarioActual, "Usuario registró un nuevo accidente");
                 break;
             }
-            case 9: consultarAccidentesUsuario(usuarioActual); break;
+            case 9: do {
+                consultarAccidentesUsuario(usuarioActual);             
+                printf("\nPresione 9 para volver al menu: ");
+                scanf("%d", &opcion);
+                getchar(); 
+            } while (opcion != 9);
+            break;
             case 0: printf("Saliendo de la vista de usuario...\n"); 
             registrarAccion(usuarioActual, "Usuario salio del menu");
             break;

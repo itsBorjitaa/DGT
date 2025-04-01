@@ -43,6 +43,8 @@ void consultarAccidentesUsuario(char *usuario) {
         printf("Error: Usuario inválido.\n");
         return;
     }
+    
+    registrarAccion(usuario, "Consultó su historial de accidentes");
 
     char sql[300];
     sprintf(sql, "SELECT id, fecha, descripcion FROM accidentes WHERE usuario='%s'", usuario);

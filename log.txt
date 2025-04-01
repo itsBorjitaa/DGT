@@ -1,6 +1,0 @@
-[2025-04-01 18:07:28] Usuario: admin - Accion: Inicio de sesion exitoso
-[2025-04-01 18:07:34] Usuario: admin - Accion: Consultó un accidente específico
-[2025-04-01 18:07:47] Usuario: prueba - Accion: Inicio de sesion exitoso
-[2025-04-01 18:08:17] Usuario: prueba - Accion: Usuario salió del menu
-[2025-04-01 18:08:22] Usuario: admin - Accion: Inicio de sesion exitoso
-[2025-04-01 18:08:28] Usuario: admin - Accion: Consultó un accidente específico

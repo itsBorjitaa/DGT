@@ -90,9 +90,9 @@ void guardarDatosUsuarioEnTXT() {
         return;
     }
 
-    registrarAccion(usuarioActual, "Exporto sus datos a un archivo TXT");
+    registrarAccion(usuarioActual, "Exportó sus datos a un archivo TXT");
 
-    // Datos
+    // Datos personales
     char sql[200];
     sprintf(sql, "SELECT nombre, apellidos, dni, email, telefono FROM usuarios WHERE usuario = ?");
 
@@ -165,6 +165,25 @@ void guardarDatosUsuarioEnTXT() {
     sqlite3_finalize(stmt);
     if (!multasEncontradas) {
         fprintf(archivo, "No tiene multas registradas.\n\n");
+    }
+
+    // Accidentes
+    fprintf(archivo, "--- Historial de Accidentes ---\n");
+    sprintf(sql, "SELECT id, fecha, descripcion FROM accidentes WHERE usuario = ?");
+    
+    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    sqlite3_bind_text(stmt, 1, usuarioActual, -1, SQLITE_STATIC);
+
+    int accidentesEncontrados = 0;
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        accidentesEncontrados = 1;
+        fprintf(archivo, "ID: %d\n", sqlite3_column_int(stmt, 0));
+        fprintf(archivo, "Fecha: %s\n", sqlite3_column_text(stmt, 1));
+        fprintf(archivo, "Descripción: %s\n\n", sqlite3_column_text(stmt, 2));
+    }
+    sqlite3_finalize(stmt);
+    if (!accidentesEncontrados) {
+        fprintf(archivo, "No tiene accidentes registrados.\n\n");
     }
 
     fclose(archivo);
