@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "usuario.h"
 #include "database.h"
 #include <time.h>
 #include "logger.h"
-#include <stdlib.h>
 
 
 // variable global para guardar el usuario actual
