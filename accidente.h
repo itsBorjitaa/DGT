@@ -3,5 +3,6 @@
 
 void consultarDatosAccidente();
 void consultarAccidentesUsuario(char *usuario);
+void registrarAccidenteConValidacion();
 
 #endif

@@ -4,6 +4,8 @@
 #include "database.h"
 #include <time.h>
 #include "logger.h"
+#include <stdlib.h>
+
 
 // variable global para guardar el usuario actual
 extern char usuarioActual[50];
@@ -64,4 +66,61 @@ void consultarAccidentesUsuario(char *usuario) {
     }
 
     sqlite3_finalize(stmt);
+}
+
+int esAnioBisiesto(int anio) {
+    return (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
+}
+
+int validarFecha(const char *fecha) {
+    int anio, mes, dia;
+
+    if (sscanf(fecha, "%4d-%2d-%2d", &anio, &mes, &dia) != 3) {
+        return 0; 
+    }
+
+    // Año de 4 dígitos y dentro de un rango válido
+    if (anio < 1900 || anio > 2100) {
+        return 0;
+    }
+
+    // Mes válido (01-12)
+    if (mes < 1 || mes > 12) {
+        return 0;
+    }
+
+    // Días máximos del mes
+    int diasPorMes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    // Si el año es bisiesto, febrero tiene 29 días
+    if (mes == 2 && esAnioBisiesto(anio)) {
+        diasPorMes[1] = 29;
+    }
+
+    // Verifica que el día sea válido según el mes
+    if (dia < 1 || dia > diasPorMes[mes - 1]) {
+        return 0;
+    }
+    return 1; 
+}
+
+void registrarAccidenteConValidacion() {
+    char fecha[20], descripcion[200];
+
+    do {
+        printf("Fecha del accidente (YYYY-MM-DD): ");
+        scanf("%19s", fecha);
+        getchar();
+
+        if (!validarFecha(fecha)) {
+            printf("Error: Fecha invalida. Debe estar en formato YYYY-MM-DD con valores correctos.\n");
+        }
+    } while (!validarFecha(fecha));
+
+    printf("Descripcion del accidente: ");
+    fgets(descripcion, sizeof(descripcion), stdin);
+    descripcion[strcspn(descripcion, "\n")] = 0;
+
+    registrarAccidente(usuarioActual, fecha, descripcion);
+    registrarAccion(usuarioActual, "Usuario registró un nuevo accidente");
 }

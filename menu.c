@@ -184,18 +184,7 @@ void menuUsuario() {
             break;
             case 6: pagarMultaUsuario(); break;
             case 7: guardarDatosUsuarioEnTXT(); break;
-            case 8: {
-                char fecha[20], descripcion[200];
-                printf("Fecha del accidente (YYYY-MM-DD): ");
-                scanf("%s", fecha);
-                getchar();
-                printf("Descripcion del accidente: ");
-                fgets(descripcion, sizeof(descripcion), stdin);
-                descripcion[strcspn(descripcion, "\n")] = 0;
-                registrarAccidente(usuarioActual, fecha, descripcion);
-                registrarAccion(usuarioActual, "Usuario registró un nuevo accidente");
-                break;
-            }
+            case 8: registrarAccidenteConValidacion(); break;
             case 9: do {
                 consultarAccidentesUsuario(usuarioActual);             
                 printf("\nPresione 9 para volver al menu: ");
