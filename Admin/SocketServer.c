@@ -9,7 +9,7 @@
 #define PORT 5000
 #define MAX_BUFFER 1024
 
-// Compilar con: gcc SocketServer.c logger.c -o server.exe -lws2_32
+// Compilar con: gcc SocketServer.c logger.c -o admin/server.exe -lws2_32
 
 int main() {
     WSADATA wsaData;
