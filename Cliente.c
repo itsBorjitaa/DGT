@@ -4,6 +4,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+//hola
 // para ejecutar: gcc -o cliente.exe cliente.c -lws2_32
 
 #pragma comment(lib, "ws2_32.lib")
