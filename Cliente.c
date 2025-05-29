@@ -271,7 +271,7 @@ void manejarComandosUsuario(SOCKET sock) {
                 char matricula[50];
                 char nuevosDatos[200];
 
-                printf("Ingrese matrícula del vehículo a modificar: ");
+                printf("Ingrese matricula del vehiculo a modificar: ");
                 fgets(matricula, sizeof(matricula), stdin);
                 matricula[strcspn(matricula, "\n")] = 0;
 
