@@ -405,6 +405,105 @@ int pagarMulta(const char* usuario, int id_multa) {
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
+//Función para guardar datos del usuario en un archivo TXT
+void guardarDatosUsuarioEnTXT(const char* usuario, const char* nombreArchivo) {
+
+    char nombreArchivoCompleto[120];
+    snprintf(nombreArchivoCompleto, sizeof(nombreArchivoCompleto), "%s.txt", nombreArchivo);
+
+
+    FILE *archivo = fopen(nombreArchivoCompleto, "w");
+    if (archivo == NULL) {
+        printf("Error al crear el archivo.");
+        return;
+    }
+
+    // --- Datos personales ---
+    char sql[300];
+    sqlite3_stmt *stmt;
+    sprintf(sql, "SELECT nombre, apellidos, dni, email, telefono FROM usuarios WHERE usuario = ?");
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK) {
+        fprintf(stderr, "Error en consulta SQL: %s\n", sqlite3_errmsg(db));
+        fclose(archivo);
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        fprintf(archivo, "----- DATOS PERSONALES -----\n");
+        fprintf(archivo, "Nombre: %s\n", sqlite3_column_text(stmt, 0));
+        fprintf(archivo, "Apellidos: %s\n", sqlite3_column_text(stmt, 1));
+        fprintf(archivo, "DNI: %s\n", sqlite3_column_text(stmt, 2));
+        fprintf(archivo, "Email: %s\n", sqlite3_column_text(stmt, 3));
+        fprintf(archivo, "Teléfono: %s\n\n", sqlite3_column_text(stmt, 4));
+    } else {
+        fprintf(archivo, "No se encontraron datos personales.\n\n");
+    }
+    sqlite3_finalize(stmt);
+
+    // --- Vehículos ---
+    sprintf(sql, "SELECT matricula, marca, modelo, anio, color, tipo_vehiculo FROM vehiculos WHERE usuario = ?");
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
+        fprintf(archivo, "----- VEHÍCULOS REGISTRADOS -----\n");
+        int encontrado = 0;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            encontrado = 1;
+            fprintf(archivo, "Matrícula: %s\n", sqlite3_column_text(stmt, 0));
+            fprintf(archivo, "Marca: %s\n", sqlite3_column_text(stmt, 1));
+            fprintf(archivo, "Modelo: %s\n", sqlite3_column_text(stmt, 2));
+            fprintf(archivo, "Año: %d\n", sqlite3_column_int(stmt, 3));
+            fprintf(archivo, "Color: %s\n", sqlite3_column_text(stmt, 4));
+            fprintf(archivo, "Tipo: %s\n\n", sqlite3_column_text(stmt, 5));
+        }
+        if (!encontrado) {
+            fprintf(archivo, "No tiene vehículos registrados.\n\n");
+        }
+        sqlite3_finalize(stmt);
+    }
+
+    // --- Multas ---
+    sprintf(sql, "SELECT m.id, m.concepto, m.fecha_delito, m.importe, m.fecha_limite_descuento, m.pagada "
+                 "FROM multas m JOIN usuarios u ON m.dni = u.dni WHERE u.usuario = ?");
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
+        fprintf(archivo, "----- MULTAS -----\n");
+        int encontrado = 0;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            encontrado = 1;
+            fprintf(archivo, "ID: %d\n", sqlite3_column_int(stmt, 0));
+            fprintf(archivo, "Concepto: %s\n", sqlite3_column_text(stmt, 1));
+            fprintf(archivo, "Fecha Delito: %s\n", sqlite3_column_text(stmt, 2));
+            fprintf(archivo, "Importe: %.2f€\n", sqlite3_column_double(stmt, 3));
+            fprintf(archivo, "Límite Descuento: %s\n", sqlite3_column_text(stmt, 4));
+            fprintf(archivo, "Pagada: %s\n\n", sqlite3_column_int(stmt, 5) ? "Sí" : "No");
+        }
+        if (!encontrado) {
+            fprintf(archivo, "No tiene multas registradas.\n\n");
+        }
+        sqlite3_finalize(stmt);
+    }
+
+    // --- Accidentes ---
+    sprintf(sql, "SELECT fecha, descripcion FROM accidentes WHERE usuario = ?");
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
+        fprintf(archivo, "----- ACCIDENTES -----\n");
+        int encontrado = 0;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            encontrado = 1;
+            fprintf(archivo, "Fecha: %s\n", sqlite3_column_text(stmt, 0));
+            fprintf(archivo, "Descripción: %s\n\n", sqlite3_column_text(stmt, 1));
+        }
+        if (!encontrado) {
+            fprintf(archivo, "No tiene accidentes registrados.\n\n");
+        }
+        sqlite3_finalize(stmt);
+    }
+
+  fclose(archivo);
+}
+
 // Función principal para procesar mensajes del cliente
 void processClientMessage(const char* message, char* response, size_t response_size) {
     char *token;
@@ -552,8 +651,17 @@ void processClientMessage(const char* message, char* response, size_t response_s
         } else {
             snprintf(response, response_size, "ERROR: ID de accidente no proporcionado");
         }
-    }
-    else {
+    }else if (strcmp(token, "EXPORT_DATA") == 0) {
+        char *usuario = strtok(NULL, ":");
+        char *nombreArchivo = strtok(NULL, ":");
+
+        if (usuario && nombreArchivo) {
+            guardarDatosUsuarioEnTXT(usuario, nombreArchivo);
+            snprintf(response, response_size, "Datos exportados correctamente en el servidor.\n");
+        } else {
+            snprintf(response, response_size, "ERROR: Formato incorrecto, use EXPORT_DATA:<usuario>:<nombreArchivo>\n");
+        }
+    } else {
         snprintf(response, response_size, "UNKNOWN_COMMAND:Comando no reconocido");
     }
 }

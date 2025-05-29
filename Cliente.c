@@ -16,6 +16,7 @@
 char usuarioActual[50] = "";
 char rolActual[10] = "";
 int sesionActiva = 0;
+char nombreArchivo[100] = "";  
 
 // Función para mostrar el menú inicial
 void mostrarMenuInicial() {
@@ -251,10 +252,13 @@ void manejarComandosUsuario(SOCKET sock) {
                 break;
                 
             case 7:
-                snprintf(mensaje, sizeof(mensaje), "EXPORT_DATA:%s", usuarioActual);
+                printf("Introduzca el nombre con el que desea guardar el archivo (sin extension): ");
+                fgets(nombreArchivo, sizeof(nombreArchivo), stdin);
+                nombreArchivo[strcspn(nombreArchivo, "\n")] = 0;  
+                snprintf(mensaje, sizeof(mensaje), "EXPORT_DATA:%s:%s", usuarioActual, nombreArchivo);
                 enviarMensaje(sock, mensaje);
                 break;
-                
+
             case 8:
                 printf("Ingrese datos del vehiculo (matricula,marca,modelo,año,color,tipo): ");
                 fgets(input, sizeof(input), stdin);
