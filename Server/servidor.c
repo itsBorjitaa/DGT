@@ -5,9 +5,8 @@
 #include <ws2tcpip.h>
 #include <time.h>
 #include <sqlite3.h>
-#include "logger.h"
 
-//para ejecutar: gcc -o servidor.exe servidor.c logger.c sqlite3.c -lws2_32
+//para ejecutar: gcc -o servidor.exe servidor.c sqlite3.c -lws2_32
 
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "sqlite3.lib")
@@ -383,6 +382,54 @@ int agregarVehiculo(const char* usuario, const char* matricula, const char* marc
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
+// Modificar vehículo por matrícula
+int modificarVehiculo(const char* usuario, const char* matricula, const char* marca, 
+                     const char* modelo, int anio, const char* color, const char* tipo) {
+    char sql[600];
+    sprintf(sql, "UPDATE vehiculos SET marca='%s', modelo='%s', anio=%d, color='%s', tipo_vehiculo='%s' "
+                 "WHERE matricula='%s' AND usuario='%s'", 
+            marca, modelo, anio, color, tipo, matricula, usuario);
+    
+    int result = sqlite3_exec(db, sql, 0, 0, 0);
+    
+    // Verificar si se modificó alguna fila
+    if (result == SQLITE_OK && sqlite3_changes(db) > 0) {
+        return 1;
+    }
+    return 0;
+}
+
+// Obtener datos de un vehículo específico
+void obtenerDatosVehiculo(const char* usuario, const char* matricula, char* response) {
+    char sql[400];
+    sprintf(sql, "SELECT matricula, marca, modelo, anio, color, tipo_vehiculo "
+                 "FROM vehiculos WHERE usuario='%s' AND matricula='%s'", usuario, matricula);
+    
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK) {
+        strcpy(response, "ERROR: No se pudo consultar el vehiculo");
+        return;
+    }
+    
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        sprintf(response, "DATOS ACTUALES DEL VEHICULO:\n"
+                         "Matricula: %s\n"
+                         "Marca: %s\n"
+                         "Modelo: %s\n"
+                         "Año: %d\n"
+                         "Color: %s\n"
+                         "Tipo: %s\n\n"
+                         "Introduce los nuevos datos (marca,modelo,año,color,tipo):",
+                sqlite3_column_text(stmt, 0), sqlite3_column_text(stmt, 1),
+                sqlite3_column_text(stmt, 2), sqlite3_column_int(stmt, 3),
+                sqlite3_column_text(stmt, 4), sqlite3_column_text(stmt, 5));
+    } else {
+        strcpy(response, "ERROR: No se encontro el vehiculo con esa matricula o no le pertenece");
+    }
+    
+    sqlite3_finalize(stmt);
+}
+
 // Función para agregar multa (admin)
 int agregarMulta(const char* dni, const char* concepto, const char* fecha_delito, 
                 double importe, const char* fecha_limite) {
@@ -406,125 +453,23 @@ int pagarMulta(const char* usuario, int id_multa) {
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
-//Función para guardar datos del usuario en un archivo TXT
-void guardarDatosUsuarioEnTXT(const char* usuario, const char* nombreArchivo) {
-
-    char nombreArchivoCompleto[120];
-    snprintf(nombreArchivoCompleto, sizeof(nombreArchivoCompleto), "%s.txt", nombreArchivo);
-
-
-    FILE *archivo = fopen(nombreArchivoCompleto, "w");
-    if (archivo == NULL) {
-        printf("Error al crear el archivo.");
-        return;
-    }
-
-    // --- Datos personales ---
-    char sql[300];
-    sqlite3_stmt *stmt;
-    sprintf(sql, "SELECT nombre, apellidos, dni, email, telefono FROM usuarios WHERE usuario = ?");
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK) {
-        fprintf(stderr, "Error en consulta SQL: %s\n", sqlite3_errmsg(db));
-        fclose(archivo);
-        return;
-    }
-
-    sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        fprintf(archivo, "----- DATOS PERSONALES -----\n");
-        fprintf(archivo, "Nombre: %s\n", sqlite3_column_text(stmt, 0));
-        fprintf(archivo, "Apellidos: %s\n", sqlite3_column_text(stmt, 1));
-        fprintf(archivo, "DNI: %s\n", sqlite3_column_text(stmt, 2));
-        fprintf(archivo, "Email: %s\n", sqlite3_column_text(stmt, 3));
-        fprintf(archivo, "Teléfono: %s\n\n", sqlite3_column_text(stmt, 4));
-    } else {
-        fprintf(archivo, "No se encontraron datos personales.\n\n");
-    }
-    sqlite3_finalize(stmt);
-
-    // --- Vehículos ---
-    sprintf(sql, "SELECT matricula, marca, modelo, anio, color, tipo_vehiculo FROM vehiculos WHERE usuario = ?");
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
-        fprintf(archivo, "----- VEHÍCULOS REGISTRADOS -----\n");
-        int encontrado = 0;
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            encontrado = 1;
-            fprintf(archivo, "Matrícula: %s\n", sqlite3_column_text(stmt, 0));
-            fprintf(archivo, "Marca: %s\n", sqlite3_column_text(stmt, 1));
-            fprintf(archivo, "Modelo: %s\n", sqlite3_column_text(stmt, 2));
-            fprintf(archivo, "Año: %d\n", sqlite3_column_int(stmt, 3));
-            fprintf(archivo, "Color: %s\n", sqlite3_column_text(stmt, 4));
-            fprintf(archivo, "Tipo: %s\n\n", sqlite3_column_text(stmt, 5));
-        }
-        if (!encontrado) {
-            fprintf(archivo, "No tiene vehículos registrados.\n\n");
-        }
-        sqlite3_finalize(stmt);
-    }
-
-    // --- Multas ---
-    sprintf(sql, "SELECT m.id, m.concepto, m.fecha_delito, m.importe, m.fecha_limite_descuento, m.pagada "
-                 "FROM multas m JOIN usuarios u ON m.dni = u.dni WHERE u.usuario = ?");
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
-        fprintf(archivo, "----- MULTAS -----\n");
-        int encontrado = 0;
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            encontrado = 1;
-            fprintf(archivo, "ID: %d\n", sqlite3_column_int(stmt, 0));
-            fprintf(archivo, "Concepto: %s\n", sqlite3_column_text(stmt, 1));
-            fprintf(archivo, "Fecha Delito: %s\n", sqlite3_column_text(stmt, 2));
-            fprintf(archivo, "Importe: %.2f€\n", sqlite3_column_double(stmt, 3));
-            fprintf(archivo, "Límite Descuento: %s\n", sqlite3_column_text(stmt, 4));
-            fprintf(archivo, "Pagada: %s\n\n", sqlite3_column_int(stmt, 5) ? "Sí" : "No");
-        }
-        if (!encontrado) {
-            fprintf(archivo, "No tiene multas registradas.\n\n");
-        }
-        sqlite3_finalize(stmt);
-    }
-
-    // --- Accidentes ---
-    sprintf(sql, "SELECT fecha, descripcion FROM accidentes WHERE usuario = ?");
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
-        fprintf(archivo, "----- ACCIDENTES -----\n");
-        int encontrado = 0;
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            encontrado = 1;
-            fprintf(archivo, "Fecha: %s\n", sqlite3_column_text(stmt, 0));
-            fprintf(archivo, "Descripción: %s\n\n", sqlite3_column_text(stmt, 1));
-        }
-        if (!encontrado) {
-            fprintf(archivo, "No tiene accidentes registrados.\n\n");
-        }
-        sqlite3_finalize(stmt);
-    }
-
-  fclose(archivo);
-}
-
-
 // Función principal para procesar mensajes del cliente
 void processClientMessage(const char* message, char* response, size_t response_size) {
     char *token;
     char message_copy[MAX_BUFFER];
     strcpy(message_copy, message);
-
+    
     token = strtok(message_copy, ":");
-
+    
     if (strcmp(token, "LOGIN") == 0) {
         char *usuario = strtok(NULL, ":");
         char *contrasena = strtok(NULL, ":");
         char rol[20];
-
+        
         if (verificarCredenciales(usuario, contrasena, rol)) {
             snprintf(response, response_size, "LOGIN_OK:%s", rol);
-            registrarAccion(usuario, "Inicio de sesión exitoso");
         } else {
             snprintf(response, response_size, "LOGIN_FAILED:Credenciales incorrectas");
-            registrarAccion(usuario, "Intento fallido de inicio de sesión");
         }
     }
     else if (strcmp(token, "REGISTER") == 0) {
@@ -536,123 +481,105 @@ void processClientMessage(const char* message, char* response, size_t response_s
         char *dni = strtok(NULL, ":");
         char *email = strtok(NULL, ":");
         char *telefono = strtok(NULL, ":");
-
+        
         if (registrarUsuario(usuario, contrasena, rol, nombre, apellidos, dni, email, telefono)) {
             snprintf(response, response_size, "REGISTER_OK:Usuario registrado correctamente");
-            registrarAccion(usuario, "Registro exitoso");
         } else {
             snprintf(response, response_size, "REGISTER_FAILED:Error al registrar usuario");
-            registrarAccion(usuario, "Error al registrar usuario");
         }
     }
     else if (strcmp(token, "USER_DATA") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarDatosUsuario(usuario, response);
-        registrarAccion(usuario, "Consulta de datos personales");
     }
     else if (strcmp(token, "USER_VEHICLES") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarVehiculosUsuario(usuario, response);
-        registrarAccion(usuario, "Consulta de vehículos personales");
     }
     else if (strcmp(token, "USER_FINES") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarMultasUsuario(usuario, response);
-        registrarAccion(usuario, "Consulta de multas personales");
     }
     else if (strcmp(token, "USER_ACCIDENTS") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarAccidentesUsuario(usuario, response);
-        registrarAccion(usuario, "Consulta de accidentes personales");
     }
     else if (strcmp(token, "ADD_ACCIDENT") == 0) {
         char *usuario = strtok(NULL, ":");
         char *descripcion = strtok(NULL, ":");
-
+        
         if (agregarAccidente(usuario, descripcion)) {
             snprintf(response, response_size, "ACCIDENT_ADDED:Accidente registrado correctamente");
-            registrarAccion(usuario, "Accidente registrado");
         } else {
             snprintf(response, response_size, "ACCIDENT_FAILED:Error al registrar accidente");
-            registrarAccion(usuario, "Error al registrar accidente");
         }
     }
     else if (strcmp(token, "ADD_VEHICLE") == 0) {
         char *usuario = strtok(NULL, ":");
         char *datos = strtok(NULL, ":");
-
+        
+        // Parsear datos del vehículo (matricula,marca,modelo,año,color,tipo)
         char *matricula = strtok(datos, ",");
         char *marca = strtok(NULL, ",");
         char *modelo = strtok(NULL, ",");
         char *anio_str = strtok(NULL, ",");
         char *color = strtok(NULL, ",");
         char *tipo = strtok(NULL, ",");
-
+        
         if (matricula && marca && modelo && anio_str && color && tipo) {
             int anio = atoi(anio_str);
             if (agregarVehiculo(usuario, matricula, marca, modelo, anio, color, tipo)) {
                 snprintf(response, response_size, "VEHICLE_ADDED:Vehiculo agregado correctamente");
-                registrarAccion(usuario, "Vehículo agregado");
             } else {
                 snprintf(response, response_size, "VEHICLE_FAILED:Error al agregar vehiculo");
-                registrarAccion(usuario, "Error al agregar vehículo");
             }
         } else {
             snprintf(response, response_size, "VEHICLE_FAILED:Datos incompletos");
-            registrarAccion(usuario, "Datos incompletos al agregar vehículo");
         }
     }
     else if (strcmp(token, "PAY_FINE") == 0) {
         char *usuario = strtok(NULL, ":");
         char *id_str = strtok(NULL, ":");
-
+        
         if (id_str) {
             int id_multa = atoi(id_str);
             if (pagarMulta(usuario, id_multa)) {
                 snprintf(response, response_size, "FINE_PAID:Multa pagada correctamente");
-                registrarAccion(usuario, "Multa pagada");
             } else {
                 snprintf(response, response_size, "FINE_FAILED:Error al pagar la multa");
-                registrarAccion(usuario, "Error al pagar multa");
             }
         } else {
             snprintf(response, response_size, "FINE_FAILED:ID de multa inválido");
-            registrarAccion(usuario, "ID de multa inválido al intentar pagar");
         }
     }
     else if (strcmp(token, "ADMIN_ALL_USERS") == 0) {
         consultarTodosUsuarios(response);
-        registrarAccion("ADMIN", "Consulta de todos los usuarios");
     }
     else if (strcmp(token, "ADMIN_ALL_VEHICLES") == 0) {
         consultarTodosVehiculos(response);
-        registrarAccion("ADMIN", "Consulta de todos los vehículos");
     }
     else if (strcmp(token, "ADMIN_ALL_FINES") == 0) {
         consultarTodasMultas(response);
-        registrarAccion("ADMIN", "Consulta de todas las multas");
     }
     else if (strcmp(token, "ADD_FINE") == 0) {
         char *datos = strtok(NULL, ":");
-
+        
+        // Parsear datos de la multa (dni,concepto,fecha_delito,importe,fecha_limite)
         char *dni = strtok(datos, ",");
         char *concepto = strtok(NULL, ",");
         char *fecha_delito = strtok(NULL, ",");
         char *importe_str = strtok(NULL, ",");
         char *fecha_limite = strtok(NULL, ",");
-
+        
         if (dni && concepto && fecha_delito && importe_str && fecha_limite) {
             double importe = atof(importe_str);
             if (agregarMulta(dni, concepto, fecha_delito, importe, fecha_limite)) {
                 snprintf(response, response_size, "FINE_ADDED:Multa agregada correctamente");
-                registrarAccion("ADMIN", "Multa agregada");
             } else {
                 snprintf(response, response_size, "FINE_FAILED:Error al agregar multa");
-                registrarAccion("ADMIN", "Error al agregar multa");
             }
         } else {
             snprintf(response, response_size, "FINE_FAILED:Datos incompletos");
-            registrarAccion("ADMIN", "Datos incompletos al agregar multa");
         }
     }
     else if (strcmp(token, "ping") == 0) {
@@ -661,30 +588,17 @@ void processClientMessage(const char* message, char* response, size_t response_s
     else if (strcmp(token, "estado") == 0) {
         snprintf(response, response_size, "Servidor DGT - Puerto %d - Base de datos activa", PORT);
     }
-    else if (strcmp(token, "Desconectado") == 0) {
+    else if (strcmp(token, "adios") == 0) {
         snprintf(response, response_size, "Hasta luego - Conexion cerrada");
     }
     else if (strcmp(token, "GET_ACCIDENT") == 0) {
         char *id_str = strtok(NULL, ":");
-
+        
         if (id_str) {
             int id_accidente = atoi(id_str);
             consultarAccidentePorId(id_accidente, response);
-            registrarAccion("ADMIN", "Consulta de accidente por ID");
         } else {
             snprintf(response, response_size, "ERROR: ID de accidente no proporcionado");
-        }
-    }
-    else if (strcmp(token, "EXPORT_DATA") == 0) {
-        char *usuario = strtok(NULL, ":");
-        char *nombreArchivo = strtok(NULL, ":");
-
-        if (usuario && nombreArchivo) {
-            guardarDatosUsuarioEnTXT(usuario, nombreArchivo);
-            snprintf(response, response_size, "Datos exportados correctamente en el servidor.\n");
-            registrarAccion(usuario, "Datos exportados a archivo");
-        } else {
-            snprintf(response, response_size, "ERROR: Formato incorrecto, use EXPORT_DATA:<usuario>:<nombreArchivo>\n");
         }
     }
     else {
@@ -692,37 +606,42 @@ void processClientMessage(const char* message, char* response, size_t response_s
     }
 }
 
-
+// Función para manejar cada cliente
 DWORD WINAPI handleClient(LPVOID lpParam) {
     ClientInfo *client = (ClientInfo*)lpParam;
     char buffer[MAX_BUFFER] = {0};
     char response[MAX_BUFFER * 2] = {0};
-
+    
     printf("Cliente conectado desde %s:%d\n", client->ip, client->port);
-
+    
     while (1) {
         memset(buffer, 0, MAX_BUFFER);
         memset(response, 0, sizeof(response));
-
+        
         int valread = recv(client->socket, buffer, MAX_BUFFER - 1, 0);
-
+        
         if (valread <= 0) {
             printf("Cliente %s:%d desconectado\n", client->ip, client->port);
             break;
         }
-
+        
         buffer[valread] = '\0';
         printf("Mensaje de %s:%d -> %s\n", client->ip, client->port, buffer);
-
+        
+        // Procesar mensaje y generar respuesta
         processClientMessage(buffer, response, sizeof(response));
-
+        
+        // Enviar respuesta
         send(client->socket, response, (int)strlen(response), 0);
-
+        
+        // Si el cliente dice adiós, cerrar conexión
+        if (strcmp(buffer, "adios") == 0) {
+            break;
+        }
     }
-
+    
     closesocket(client->socket);
     free(client);
-    remove("log.txt");
     return 0;
 }
 
