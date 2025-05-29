@@ -4,7 +4,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-//hola
 // para ejecutar: gcc -o cliente.exe cliente.c -lws2_32
 
 #pragma comment(lib, "ws2_32.lib")
@@ -15,7 +14,7 @@
 
 // Variables globales para sesión
 char usuarioActual[50] = "";
-char rolActual[20] = "";
+char rolActual[10] = "";
 int sesionActiva = 0;
 
 // Función para mostrar el menú inicial
