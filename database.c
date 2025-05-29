@@ -162,7 +162,7 @@ int registrarUsuario(char *usuario, char *contrasena, char *rol, char *nombre, c
 }
 
 // funcion para añadir una multa (administradores)
-int agregarMulta(char *dni, char *concepto, char *fecha_delito, double importe, char *fecha_limite_descuento) {
+int agregarMulta(const char *dni, const char *concepto, const char *fecha_delito, double importe, const char *fecha_limite_descuento) {
     char *errMsg = 0;
     char sql[500];
     
@@ -202,7 +202,7 @@ char* obtenerDNI(char *usuario, char *dni_buffer) {
 }
 
 // funcion para marcar multa como pagada
-int pagarMulta(int id_multa, char *fecha_pago) {
+int pagarMulta(int id_multa, const *fecha_pago) {
     char *errMsg = 0;
     char sql[200];
     
