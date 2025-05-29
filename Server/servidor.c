@@ -168,17 +168,25 @@ void consultarDatosUsuario(const char* usuario, char* response) {
 }
 
 // Función para consultar vehículos de usuario
-void consultarVehiculosUsuario(const char* usuario, char* response) {
+char* consultarVehiculosUsuario(const char* usuario) {
     char sql[300];
     sprintf(sql, "SELECT matricula, marca, modelo, anio, color, tipo_vehiculo FROM vehiculos WHERE usuario='%s'", usuario);
-    
+
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) != SQLITE_OK) {
-        strcpy(response, "ERROR: No se pudieron consultar los vehiculos");
-        return;
+        char* errorMsg = malloc(50);
+        if (errorMsg) strcpy(errorMsg, "ERROR: No se pudieron consultar los vehiculos");
+        return errorMsg;
     }
-    
+
+    size_t buffer_size = 1024;
+    char* response = malloc(buffer_size);
+    if (!response) {
+        sqlite3_finalize(stmt);
+        return NULL;
+    }
     strcpy(response, "VEHICULOS REGISTRADOS:\n");
+
     int count = 0;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         char vehiculo[200];
@@ -186,16 +194,31 @@ void consultarVehiculosUsuario(const char* usuario, char* response) {
                 sqlite3_column_text(stmt, 0), sqlite3_column_text(stmt, 1),
                 sqlite3_column_text(stmt, 2), sqlite3_column_int(stmt, 3),
                 sqlite3_column_text(stmt, 4), sqlite3_column_text(stmt, 5));
+
+        size_t needed = strlen(response) + strlen(vehiculo) + 1;
+        if (needed > buffer_size) {
+            buffer_size *= 2;
+            char* tmp = realloc(response, buffer_size);
+            if (!tmp) {
+                free(response);
+                sqlite3_finalize(stmt);
+                return NULL;
+            }
+            response = tmp;
+        }
+
         strcat(response, vehiculo);
         count++;
     }
-    
+
     if (count == 0) {
         strcat(response, "No tiene vehiculos registrados");
     }
-    
+
     sqlite3_finalize(stmt);
+    return response; 
 }
+
 
 // Función para consultar multas de usuario
 void consultarMultasUsuario(const char* usuario, char* response) {
@@ -599,9 +622,15 @@ void processClientMessage(const char* message, char* response, size_t response_s
     }
     else if (strcmp(token, "USER_VEHICLES") == 0) {
         char *usuario = strtok(NULL, ":");
-        consultarVehiculosUsuario(usuario, response);
+        char *vehiculos_info = consultarVehiculosUsuario(usuario);
+        if (vehiculos_info) {
+            strcpy(response, vehiculos_info); 
+            free(vehiculos_info);              
+        } else {
+            strcpy(response, "ERROR: No se pudo consultar los vehículos.");
+        }
         registrarAccion(usuario, "Consulta de vehículos personales");
-    }
+    }   
     else if (strcmp(token, "USER_FINES") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarMultasUsuario(usuario, response);
