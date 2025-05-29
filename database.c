@@ -202,7 +202,7 @@ char* obtenerDNI(char *usuario, char *dni_buffer) {
 }
 
 // funcion para marcar multa como pagada
-int pagarMulta(int id_multa, const *fecha_pago) {
+int pagarMulta(int id_multa, const char *fecha_pago) {
     char *errMsg = 0;
     char sql[200];
     
