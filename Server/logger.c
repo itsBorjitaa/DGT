@@ -6,7 +6,7 @@
 // Función para registrar acciones del usuario en un archivo de log
 void registrarAccion(const char *usuario, const char *accion) {
     char filename[100];
-    snprintf(filename, sizeof(filename), "log.txt", usuario);  // log_juan.txt, etc.
+    snprintf(filename, sizeof(filename), "log.txt", usuario);  
 
     FILE *logFile = fopen(filename, "a");
     if (logFile == NULL) {
