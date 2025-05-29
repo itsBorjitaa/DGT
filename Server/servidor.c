@@ -737,36 +737,45 @@ void processClientMessage(const char* message, char* response, size_t response_s
         }
     } else if (strcmp(token, "MODIFY_VEHICLE") == 0) {
         char *usuario = strtok(NULL, ":");
+        char *matricula = strtok(NULL, ":");
+
+        if (usuario && matricula) {
+            obtenerDatosVehiculo(usuario, matricula, response);
+        } else {
+            snprintf(response, response_size, "ERROR: Faltan datos (usuario o matrícula)");
+        }
+    } else if (strcmp(token, "MODIFY_VEHICLE_DATA") == 0) {
+        char *usuario = strtok(NULL, ":");
+        char *matricula = strtok(NULL, ":");
         char *datos = strtok(NULL, ":");
 
-        // datos = matricula,marca,modelo,anio,color,tipo
-        char *matricula = strtok(datos, ",");
-        char *marca = strtok(NULL, ",");
-        char *modelo = strtok(NULL, ",");
-        char *anio_str = strtok(NULL, ",");
-        char *color = strtok(NULL, ",");
-        char *tipo = strtok(NULL, ",");
+        if (usuario && matricula && datos) {
+            char *marca = strtok(datos, ",");
+            char *modelo = strtok(NULL, ",");
+            char *anio_str = strtok(NULL, ",");
+            char *color = strtok(NULL, ",");
+            char *tipo = strtok(NULL, ",");
 
-        if (usuario && matricula && marca && modelo && anio_str && color && tipo) {
-            int anio = atoi(anio_str);
-            if (modificarVehiculo(usuario, matricula, marca, modelo, anio, color, tipo)) {
-                snprintf(response, response_size, "VEHICLE_MODIFIED:Vehículo modificado correctamente");
-
-                // Registrar acción en el log
-                char mensaje_log[256];
-                snprintf(mensaje_log, sizeof(mensaje_log),
-                "Modificó el vehículo con matrícula %s", matricula);
-                registrarAccion(usuario, mensaje_log);
-            } else {
-                snprintf(response, response_size, "VEHICLE_MODIFY_FAILED:No se pudo modificar el vehículo");
-            }
+            if (marca && modelo && anio_str && color && tipo) {
+                int anio = atoi(anio_str);
+                if (modificarVehiculo(usuario, matricula, marca, modelo, anio, color, tipo)) {
+                    snprintf(response, response_size, "VEHICLE_MODIFIED:Vehículo modificado correctamente");
+                    char log_msg[256];
+                    snprintf(log_msg, sizeof(log_msg), "Modificó el vehículo %s", matricula);
+                    registrarAccion(usuario, log_msg);
+                } else {
+                    snprintf(response, response_size, "VEHICLE_MODIFY_FAILED:No se modificó el vehículo");
+                }
         } else {
-            snprintf(response, response_size, "VEHICLE_MODIFY_FAILED:Datos incompletos");
+            snprintf(response, response_size, "ERROR: Datos incompletos para modificación");
         }
     } else {
+        snprintf(response, response_size, "ERROR: Faltan argumentos para modificar vehículo");
+    }
+} else {
         snprintf(response, response_size, "UNKNOWN_COMMAND:Comando no reconocido");
     }
-}
+}  
 
     DWORD WINAPI handleClient(LPVOID lpParam) {
     ClientInfo *client = (ClientInfo*)lpParam;

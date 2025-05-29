@@ -267,14 +267,33 @@ void manejarComandosUsuario(SOCKET sock) {
                 enviarMensaje(sock, mensaje);
                 break;
                 
-            case 9:
-                printf("Ingrese matricula del vehiculo a modificar: ");
-                fgets(input, sizeof(input), stdin);
-                input[strcspn(input, "\n")] = 0;
-                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE:%s:%s", usuarioActual, input);
-                enviarMensaje(sock, mensaje);
+            case 9: {
+                char matricula[50];
+                char nuevosDatos[200];
+
+                printf("Ingrese matrícula del vehículo a modificar: ");
+                fgets(matricula, sizeof(matricula), stdin);
+                matricula[strcspn(matricula, "\n")] = 0;
+
+                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE:%s:%s", usuarioActual, matricula);
+                if (enviarMensaje(sock, mensaje) == -1) {
+                    printf("Error comunicándose con el servidor.\n");
+                    break;
+                }
+
+                printf("Introduce los nuevos datos separados por coma (marca,modelo,anio,color,tipo): ");
+                fgets(nuevosDatos, sizeof(nuevosDatos), stdin);
+                nuevosDatos[strcspn(nuevosDatos, "\n")] = 0;
+
+                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE_DATA:%s:%s:%s", usuarioActual, matricula, nuevosDatos);
+                if (enviarMensaje(sock, mensaje) == -1) {
+                    printf("Error comunicándose con el servidor.\n");
+                    break;
+                }
+
                 break;
-                
+            }
+
             case 0:
                 printf("Cerrando sesion...\n");
                 sesionActiva = 0;
