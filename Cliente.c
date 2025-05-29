@@ -430,7 +430,7 @@ int main() {
                     
                 case 0:
                     printf("Saliendo...\n");
-                    enviarMensaje(sock, "adios");
+                    enviarMensaje(sock, "Desconectado");
                     goto cleanup;
                     
                 default:

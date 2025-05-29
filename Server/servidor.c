@@ -5,8 +5,9 @@
 #include <ws2tcpip.h>
 #include <time.h>
 #include <sqlite3.h>
+#include "logger.h"
 
-//para ejecutar: gcc -o servidor.exe servidor.c sqlite3.c -lws2_32
+//para ejecutar: gcc -o servidor.exe servidor.c logger.c sqlite3.c -lws2_32
 
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "sqlite3.lib")
@@ -504,23 +505,26 @@ void guardarDatosUsuarioEnTXT(const char* usuario, const char* nombreArchivo) {
   fclose(archivo);
 }
 
+
 // Función principal para procesar mensajes del cliente
 void processClientMessage(const char* message, char* response, size_t response_size) {
     char *token;
     char message_copy[MAX_BUFFER];
     strcpy(message_copy, message);
-    
+
     token = strtok(message_copy, ":");
-    
+
     if (strcmp(token, "LOGIN") == 0) {
         char *usuario = strtok(NULL, ":");
         char *contrasena = strtok(NULL, ":");
         char rol[20];
-        
+
         if (verificarCredenciales(usuario, contrasena, rol)) {
             snprintf(response, response_size, "LOGIN_OK:%s", rol);
+            registrarAccion(usuario, "Inicio de sesión exitoso");
         } else {
             snprintf(response, response_size, "LOGIN_FAILED:Credenciales incorrectas");
+            registrarAccion(usuario, "Intento fallido de inicio de sesión");
         }
     }
     else if (strcmp(token, "REGISTER") == 0) {
@@ -532,105 +536,123 @@ void processClientMessage(const char* message, char* response, size_t response_s
         char *dni = strtok(NULL, ":");
         char *email = strtok(NULL, ":");
         char *telefono = strtok(NULL, ":");
-        
+
         if (registrarUsuario(usuario, contrasena, rol, nombre, apellidos, dni, email, telefono)) {
             snprintf(response, response_size, "REGISTER_OK:Usuario registrado correctamente");
+            registrarAccion(usuario, "Registro exitoso");
         } else {
             snprintf(response, response_size, "REGISTER_FAILED:Error al registrar usuario");
+            registrarAccion(usuario, "Error al registrar usuario");
         }
     }
     else if (strcmp(token, "USER_DATA") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarDatosUsuario(usuario, response);
+        registrarAccion(usuario, "Consulta de datos personales");
     }
     else if (strcmp(token, "USER_VEHICLES") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarVehiculosUsuario(usuario, response);
+        registrarAccion(usuario, "Consulta de vehículos personales");
     }
     else if (strcmp(token, "USER_FINES") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarMultasUsuario(usuario, response);
+        registrarAccion(usuario, "Consulta de multas personales");
     }
     else if (strcmp(token, "USER_ACCIDENTS") == 0) {
         char *usuario = strtok(NULL, ":");
         consultarAccidentesUsuario(usuario, response);
+        registrarAccion(usuario, "Consulta de accidentes personales");
     }
     else if (strcmp(token, "ADD_ACCIDENT") == 0) {
         char *usuario = strtok(NULL, ":");
         char *descripcion = strtok(NULL, ":");
-        
+
         if (agregarAccidente(usuario, descripcion)) {
             snprintf(response, response_size, "ACCIDENT_ADDED:Accidente registrado correctamente");
+            registrarAccion(usuario, "Accidente registrado");
         } else {
             snprintf(response, response_size, "ACCIDENT_FAILED:Error al registrar accidente");
+            registrarAccion(usuario, "Error al registrar accidente");
         }
     }
     else if (strcmp(token, "ADD_VEHICLE") == 0) {
         char *usuario = strtok(NULL, ":");
         char *datos = strtok(NULL, ":");
-        
-        // Parsear datos del vehículo (matricula,marca,modelo,año,color,tipo)
+
         char *matricula = strtok(datos, ",");
         char *marca = strtok(NULL, ",");
         char *modelo = strtok(NULL, ",");
         char *anio_str = strtok(NULL, ",");
         char *color = strtok(NULL, ",");
         char *tipo = strtok(NULL, ",");
-        
+
         if (matricula && marca && modelo && anio_str && color && tipo) {
             int anio = atoi(anio_str);
             if (agregarVehiculo(usuario, matricula, marca, modelo, anio, color, tipo)) {
                 snprintf(response, response_size, "VEHICLE_ADDED:Vehiculo agregado correctamente");
+                registrarAccion(usuario, "Vehículo agregado");
             } else {
                 snprintf(response, response_size, "VEHICLE_FAILED:Error al agregar vehiculo");
+                registrarAccion(usuario, "Error al agregar vehículo");
             }
         } else {
             snprintf(response, response_size, "VEHICLE_FAILED:Datos incompletos");
+            registrarAccion(usuario, "Datos incompletos al agregar vehículo");
         }
     }
     else if (strcmp(token, "PAY_FINE") == 0) {
         char *usuario = strtok(NULL, ":");
         char *id_str = strtok(NULL, ":");
-        
+
         if (id_str) {
             int id_multa = atoi(id_str);
             if (pagarMulta(usuario, id_multa)) {
                 snprintf(response, response_size, "FINE_PAID:Multa pagada correctamente");
+                registrarAccion(usuario, "Multa pagada");
             } else {
                 snprintf(response, response_size, "FINE_FAILED:Error al pagar la multa");
+                registrarAccion(usuario, "Error al pagar multa");
             }
         } else {
             snprintf(response, response_size, "FINE_FAILED:ID de multa inválido");
+            registrarAccion(usuario, "ID de multa inválido al intentar pagar");
         }
     }
     else if (strcmp(token, "ADMIN_ALL_USERS") == 0) {
         consultarTodosUsuarios(response);
+        registrarAccion("ADMIN", "Consulta de todos los usuarios");
     }
     else if (strcmp(token, "ADMIN_ALL_VEHICLES") == 0) {
         consultarTodosVehiculos(response);
+        registrarAccion("ADMIN", "Consulta de todos los vehículos");
     }
     else if (strcmp(token, "ADMIN_ALL_FINES") == 0) {
         consultarTodasMultas(response);
+        registrarAccion("ADMIN", "Consulta de todas las multas");
     }
     else if (strcmp(token, "ADD_FINE") == 0) {
         char *datos = strtok(NULL, ":");
-        
-        // Parsear datos de la multa (dni,concepto,fecha_delito,importe,fecha_limite)
+
         char *dni = strtok(datos, ",");
         char *concepto = strtok(NULL, ",");
         char *fecha_delito = strtok(NULL, ",");
         char *importe_str = strtok(NULL, ",");
         char *fecha_limite = strtok(NULL, ",");
-        
+
         if (dni && concepto && fecha_delito && importe_str && fecha_limite) {
             double importe = atof(importe_str);
             if (agregarMulta(dni, concepto, fecha_delito, importe, fecha_limite)) {
                 snprintf(response, response_size, "FINE_ADDED:Multa agregada correctamente");
+                registrarAccion("ADMIN", "Multa agregada");
             } else {
                 snprintf(response, response_size, "FINE_FAILED:Error al agregar multa");
+                registrarAccion("ADMIN", "Error al agregar multa");
             }
         } else {
             snprintf(response, response_size, "FINE_FAILED:Datos incompletos");
+            registrarAccion("ADMIN", "Datos incompletos al agregar multa");
         }
     }
     else if (strcmp(token, "ping") == 0) {
@@ -639,69 +661,68 @@ void processClientMessage(const char* message, char* response, size_t response_s
     else if (strcmp(token, "estado") == 0) {
         snprintf(response, response_size, "Servidor DGT - Puerto %d - Base de datos activa", PORT);
     }
-    else if (strcmp(token, "adios") == 0) {
+    else if (strcmp(token, "Desconectado") == 0) {
         snprintf(response, response_size, "Hasta luego - Conexion cerrada");
     }
     else if (strcmp(token, "GET_ACCIDENT") == 0) {
         char *id_str = strtok(NULL, ":");
-        
+
         if (id_str) {
             int id_accidente = atoi(id_str);
             consultarAccidentePorId(id_accidente, response);
+            registrarAccion("ADMIN", "Consulta de accidente por ID");
         } else {
             snprintf(response, response_size, "ERROR: ID de accidente no proporcionado");
         }
-    }else if (strcmp(token, "EXPORT_DATA") == 0) {
+    }
+    else if (strcmp(token, "EXPORT_DATA") == 0) {
         char *usuario = strtok(NULL, ":");
         char *nombreArchivo = strtok(NULL, ":");
 
         if (usuario && nombreArchivo) {
             guardarDatosUsuarioEnTXT(usuario, nombreArchivo);
             snprintf(response, response_size, "Datos exportados correctamente en el servidor.\n");
+            registrarAccion(usuario, "Datos exportados a archivo");
         } else {
             snprintf(response, response_size, "ERROR: Formato incorrecto, use EXPORT_DATA:<usuario>:<nombreArchivo>\n");
         }
-    } else {
+    }
+    else {
         snprintf(response, response_size, "UNKNOWN_COMMAND:Comando no reconocido");
     }
 }
 
-// Función para manejar cada cliente
+
 DWORD WINAPI handleClient(LPVOID lpParam) {
     ClientInfo *client = (ClientInfo*)lpParam;
     char buffer[MAX_BUFFER] = {0};
     char response[MAX_BUFFER * 2] = {0};
-    
+
     printf("Cliente conectado desde %s:%d\n", client->ip, client->port);
-    
+
     while (1) {
         memset(buffer, 0, MAX_BUFFER);
         memset(response, 0, sizeof(response));
-        
+
         int valread = recv(client->socket, buffer, MAX_BUFFER - 1, 0);
-        
+
         if (valread <= 0) {
             printf("Cliente %s:%d desconectado\n", client->ip, client->port);
             break;
         }
-        
+
         buffer[valread] = '\0';
         printf("Mensaje de %s:%d -> %s\n", client->ip, client->port, buffer);
-        
-        // Procesar mensaje y generar respuesta
+
         processClientMessage(buffer, response, sizeof(response));
-        
-        // Enviar respuesta
+
         send(client->socket, response, (int)strlen(response), 0);
-        
-        // Si el cliente dice adiós, cerrar conexión
-        if (strcmp(buffer, "adios") == 0) {
-            break;
-        }
+
     }
-    
+
     closesocket(client->socket);
     free(client);
+    remove("log.txt");
     return 0;
 }
 
