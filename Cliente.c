@@ -268,7 +268,7 @@ void manejarComandosUsuario(SOCKET sock) {
                 break;
                 
             case 9:
-                printf("Inserte la matricula del vehiculo");
+                printf("Ingrese matricula del vehiculo a modificar: ");
                 fgets(input, sizeof(input), stdin);
                 input[strcspn(input, "\n")] = 0;
                 snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE:%s:%s", usuarioActual, input);
