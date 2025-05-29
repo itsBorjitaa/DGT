@@ -759,18 +759,18 @@ void processClientMessage(const char* message, char* response, size_t response_s
             if (marca && modelo && anio_str && color && tipo) {
                 int anio = atoi(anio_str);
                 if (modificarVehiculo(usuario, matricula, marca, modelo, anio, color, tipo)) {
-                    snprintf(response, response_size, "VEHICLE_MODIFIED:Vehículo modificado correctamente");
+                    snprintf(response, response_size, "VEHICLE_MODIFIED:Vehiculo modificado correctamente");
                     char log_msg[256];
                     snprintf(log_msg, sizeof(log_msg), "Modificó el vehículo %s", matricula);
                     registrarAccion(usuario, log_msg);
                 } else {
-                    snprintf(response, response_size, "VEHICLE_MODIFY_FAILED:No se modificó el vehículo");
+                    snprintf(response, response_size, "VEHICLE_MODIFY_FAILED:No se modifico el vehiculo");
                 }
         } else {
-            snprintf(response, response_size, "ERROR: Datos incompletos para modificación");
+            snprintf(response, response_size, "ERROR: Datos incompletos para modificacion");
         }
     } else {
-        snprintf(response, response_size, "ERROR: Faltan argumentos para modificar vehículo");
+        snprintf(response, response_size, "ERROR: Faltan argumentos para modificar vehiculo");
     }
 } else {
         snprintf(response, response_size, "UNKNOWN_COMMAND:Comando no reconocido");
