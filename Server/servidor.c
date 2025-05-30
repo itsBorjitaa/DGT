@@ -898,6 +898,9 @@ void processClientMessage(const char* message, char* response, size_t response_s
 
             if (sqlite3_exec(db, sql_update, NULL, NULL, NULL) == SQLITE_OK) {
                 snprintf(response, response_size, "Multa con ID %d actualizada correctamente.", id);
+                
+                registrarAccion("admin", estado == 1 ? 
+                    "Multa marcada como pagada" : "Multa marcada como no pagada");
             } else {
                 snprintf(response, response_size, "ERROR: No se pudo actualizar la multa.");
             }
