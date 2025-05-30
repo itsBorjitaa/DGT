@@ -2,7 +2,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include <sqlite3.h>
+#include "sqlite3.h"
 #include <iomanip>
 #include <fstream>
 #include "database.h"
@@ -15,7 +15,7 @@ extern char usuarioActual[50];
 extern sqlite3* db;
 
 Usuario::Usuario() 
-    : nombre(nullptr), apellidos(nullptr), dni(nullptr), email(nullptr), telefono(nullptr), rol(), usuario(), contrasena() {
+    : nombre(nullptr), apellidos(nullptr), dni(nullptr), email(nullptr), telefono(nullptr), rol(nullptr), usuario(nullptr), contrasena(nullptr) {
     setNombre("");
     setApellidos("");
     setDni("");
@@ -100,32 +100,32 @@ const char* Usuario::getTelefono() const {
 
 void Usuario::setUsuario(const char* usuario) {
     delete[] this->usuario;
-    *this->usuario = new char[strlen(usuario) + 1];
-    strcpy(*this->usuario, usuario);
+    this->usuario = new char[strlen(usuario) + 1];
+    strcpy(this->usuario, usuario);
 }
 
 const char* Usuario::getUsuario() const {
-    return *this->usuario;
+    return this->usuario;
 }
 
 void Usuario::setContrasena(const char* contrasena) {
     delete[] this->contrasena;
-    *this->contrasena = new char[strlen(contrasena) + 1];
-    strcpy(*this->contrasena, contrasena);
+    this->contrasena = new char[strlen(contrasena) + 1];
+    strcpy(this->contrasena, contrasena);
 }
 
 const char* Usuario::getContrasena() const {
-    return *this->contrasena;
+    return this->contrasena;
 }
 
 void Usuario::setRol(const char* rol) {
     delete[] this->rol;
-    *this->rol = new char[strlen(rol) + 1];
-    strcpy(*this->rol, rol);
+    this->rol = new char[strlen(rol) + 1];
+    strcpy(this->rol, rol);
 }
 
 const char* Usuario::getRol() const {
-    return *this->rol;
+    return this->rol;
 }
 
 std::string Usuario::obtenerTexto(sqlite3_stmt* stmt, int columna) const {

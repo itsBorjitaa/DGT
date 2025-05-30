@@ -1,7 +1,7 @@
 #ifndef USUARIO_H
 #define USUARIO_H
 
-#include <sqlite3.h>
+#include "sqlite3.h"
 class Usuario
 {
 private:
@@ -10,9 +10,9 @@ private:
     char* dni;
     char* email;
     char* telefono;
-	char* usuario[50];
-	char* contrasena[50];
-	char* rol[10];
+	char* usuario;
+	char* contrasena;
+	char* rol;
 public:
 	Usuario();
 	Usuario(const char*, const char*, const char*, const char*, const char*, const char*, const char*, const char*);
