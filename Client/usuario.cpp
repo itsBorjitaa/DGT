@@ -8,8 +8,6 @@
 
 // Variable global para guardar el usuario actual
 extern char usuarioActual[50];
-// Declaración externa de la base de datos
-extern sqlite3* db;
 
 Usuario::Usuario() 
     : nombre(nullptr), apellidos(nullptr), dni(nullptr), email(nullptr), telefono(nullptr), rol(nullptr), usuario(nullptr), contrasena(nullptr) {

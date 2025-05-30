@@ -10,8 +10,6 @@
 
 // variable global para guardar el usuario actual
 extern char usuarioActual[50];
-// declaración externa de la base de datos
-extern sqlite3 *db;
 
 Accidente::Accidente()
 {
