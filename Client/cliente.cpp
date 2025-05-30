@@ -274,9 +274,31 @@ void manejarComandosUsuario(SOCKET sock) {
                 enviarMensaje(sock, mensaje);
                 break;
 
-            case 9:
-                std::cout << "Funcionalidad de modificar vehiculo en desarrollo...\n";
+            case 9: {
+                std::string matricula;
+                std::string nuevosDatos;
+
+                std::cout << "Ingrese matricula del vehiculo a modificar: ";
+                std::getline(std::cin, matricula);
+
+                char mensaje[MAX_BUFFER];
+                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE:%s:%s", usuarioActual, matricula.c_str());
+                if (enviarMensaje(sock, mensaje) == -1) {
+                std::cerr << "Error comunicándose con el servidor.\n";
                 break;
+            }
+
+                std::cout << "Introduce los nuevos datos separados por coma (marca,modelo,anio,color,tipo): ";
+                std::getline(std::cin, nuevosDatos);
+
+                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE_DATA:%s:%s:%s", usuarioActual, matricula.c_str(), nuevosDatos.c_str());
+                if (enviarMensaje(sock, mensaje) == -1) {
+                    std::cerr << "Error comunicándose con el servidor.\n";
+                    break;
+                }
+
+                break;
+        }
 
             case 0:
                 std::cout << "Cerrando sesion...\n";
