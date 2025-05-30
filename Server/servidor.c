@@ -576,6 +576,50 @@ int pagarMulta(const char* usuario, int id_multa) {
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
+// Función para cambiar el estado de una multa (admin)
+void cambiarEstadoMulta() {
+    int id_multa;
+    char usuario[50]; 
+
+    printf("\n--- Cambiar Estado de Multa ---\n");
+    printf("Usuario: ");
+    scanf("%49s", usuario);
+
+    printf("ID de la multa: ");
+    scanf("%d", &id_multa);
+
+    char sql_check[300];
+    sprintf(sql_check, "SELECT pagada FROM multas WHERE id=%d AND dni IN (SELECT dni FROM usuarios WHERE usuario='%s')", id_multa, usuario);
+
+    sqlite3_stmt *stmt_check;
+    int multa_existe = 0;
+    int ya_pagada = 0;
+
+    if (sqlite3_prepare_v2(db, sql_check, -1, &stmt_check, 0) == SQLITE_OK) {
+        if (sqlite3_step(stmt_check) == SQLITE_ROW) {
+            multa_existe = 1;
+            ya_pagada = sqlite3_column_int(stmt_check, 0);
+        }
+        sqlite3_finalize(stmt_check);
+    }
+
+    if (!multa_existe) {
+        printf("La multa con ID %d no existe para el usuario %s.\n", id_multa, usuario);
+        return;
+    }
+
+    if (ya_pagada) {
+        printf("La multa ya está marcada como pagada.\n");
+        return;
+    }
+
+    if (pagarMulta(usuario, id_multa)) {
+        printf("Estado de la multa actualizado correctamente.\n");
+    } else {
+        printf("Error al actualizar el estado de la multa.\n");
+    }
+}
+
 // Función principal para procesar mensajes del cliente
 void processClientMessage(const char* message, char* response, size_t response_size) {
     char *token;
@@ -800,6 +844,64 @@ void processClientMessage(const char* message, char* response, size_t response_s
         }
     } else {
         snprintf(response, response_size, "ERROR: Faltan argumentos para modificar vehiculo");
+    }
+} else if (strcmp(token, "CHECK_FINE_EXISTS") == 0) {
+    char *id_str = strtok(NULL, ":");
+    int id = atoi(id_str);
+
+    char sql[100];
+    sprintf(sql, "SELECT 1 FROM multas WHERE id=%d", id);
+
+    sqlite3_stmt *stmt;
+    int existe = 0;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            existe = 1;
+        }
+        sqlite3_finalize(stmt);
+    }
+
+    if (existe) {
+        snprintf(response, response_size, "OK: Multa encontrada.");
+    } else {
+        snprintf(response, response_size, "ERROR: La multa con ID %d no existe.", id);
+    }
+} else if (strcmp(token, "UPDATE_FINE_STATE") == 0) {
+    char *id_str = strtok(NULL, ":");
+    char *estado_str = strtok(NULL, ":");
+
+    if (id_str == NULL || estado_str == NULL) {
+        snprintf(response, response_size, "ERROR: Faltan datos para actualizar multa.");
+    } else {
+        int id = atoi(id_str);
+        int estado = atoi(estado_str);
+
+        char sql_check[100];
+        sprintf(sql_check, "SELECT 1 FROM multas WHERE id=%d", id);
+
+        sqlite3_stmt *stmt_check;
+        int existe = 0;
+
+        if (sqlite3_prepare_v2(db, sql_check, -1, &stmt_check, 0) == SQLITE_OK) {
+            if (sqlite3_step(stmt_check) == SQLITE_ROW) {
+                existe = 1;
+            }
+            sqlite3_finalize(stmt_check);
+        }
+
+        if (!existe) {
+            snprintf(response, response_size, "ERROR: La multa con ID %d no existe.", id);
+        } else {
+            char sql_update[200];
+            sprintf(sql_update, "UPDATE multas SET pagada = %d WHERE id = %d", estado, id);
+
+            if (sqlite3_exec(db, sql_update, NULL, NULL, NULL) == SQLITE_OK) {
+                snprintf(response, response_size, "Multa con ID %d actualizada correctamente.", id);
+            } else {
+                snprintf(response, response_size, "ERROR: No se pudo actualizar la multa.");
+            }
+        }
     }
 } else {
         snprintf(response, response_size, "UNKNOWN_COMMAND:Comando no reconocido");

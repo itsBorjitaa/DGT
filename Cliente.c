@@ -340,14 +340,47 @@ void manejarComandosAdmin(SOCKET sock) {
                 enviarMensaje(sock, mensaje);
                 break;
                 
-            case 5:
-                printf("Ingrese ID de multa y nuevo estado (id,estado): ");
+            case 5: {
+                char input[10];
+                int id_multa;
+
+                printf("Ingrese ID de la multa a actualizar: ");
                 fgets(input, sizeof(input), stdin);
                 input[strcspn(input, "\n")] = 0;
-                snprintf(mensaje, sizeof(mensaje), "CHANGE_FINE_STATUS:%s", input);
-                enviarMensaje(sock, mensaje);
+                id_multa = atoi(input);
+
+                snprintf(mensaje, sizeof(mensaje), "CHECK_FINE_EXISTS:%d", id_multa);
+    
+                char respuesta[MAX_BUFFER] = {0};
+
+                int send_result = send(sock, mensaje, (int)strlen(mensaje), 0);
+                if (send_result == SOCKET_ERROR) {
+                    printf("Error enviando mensaje: %d\n", WSAGetLastError());
+                    break;
+                }
+
+                int valread = recv(sock, respuesta, MAX_BUFFER - 1, 0);
+                if (valread <= 0) {
+                    printf("Error recibiendo respuesta o conexión cerrada.\n");
+                    break;
+                }
+                respuesta[valread] = '\0';
+
+                if (strncmp(respuesta, "OK", 2) == 0) {
+                    printf("Ingrese nuevo estado (1 = pagada, 0 = no pagada): ");
+                    fgets(input, sizeof(input), stdin);
+                    input[strcspn(input, "\n")] = 0;
+                    int nuevo_estado = atoi(input);
+
+                    snprintf(mensaje, sizeof(mensaje), "UPDATE_FINE_STATE:%d:%d", id_multa, nuevo_estado);
+                    enviarMensaje(sock, mensaje);
+                } else {
+                    printf("Respuesta del servidor:\n%s\n", respuesta);
+                }
+
                 break;
-                
+            }
+
             case 6:
                 printf("Ingrese ID del accidente: ");
                 fgets(input, sizeof(input), stdin);
