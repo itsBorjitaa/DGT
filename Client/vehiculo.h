@@ -29,11 +29,7 @@ public:
     char* getTipo_vehiculo() const;
 	void setTipo_vehiculo(const char*);
 
-	void consultarDatosVehiculos() const;
-	void modificarInformacionVehiculo() const;
-    bool validarMatricula(const std::string& matricula) const;
-    void agregarNuevoVehiculo() const;
-    void consultarTodosLosVehiculos() const;
+
 };
 
 #endif /* VEHICULO_H_ */

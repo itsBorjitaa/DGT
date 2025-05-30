@@ -37,9 +37,6 @@ public:
     std::string obtenerTexto(sqlite3_stmt *stmt, int columna) const;
     void setRol(const char *);
 
-    void consultarDatosUsuario() const;
-	void consultarTodosLosUsuarios() const;
-    void guardarDatosUsuarioEnTXT() const;
 };
 
 #endif /* USUARIO_H_ */

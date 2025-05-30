@@ -35,11 +35,6 @@ public:
     char* getFecha_pago() const;
 	void setFecha_pago(const char*);
 
-	void consultarMultasAdmin() const;
-	void agregarMultaAdmin() const;
-    void cambiarEstadoMulta() const;
-    void consultarMultasUsuario() const;
-    void pagarMultaUsuario() const;
 };
 
 #endif /* MULTA_H_ */
