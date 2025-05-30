@@ -1,6 +1,7 @@
 #ifndef USUARIO_H
 #define USUARIO_H
 
+#include "sqlite3.h"
 class Usuario
 {
 private:
@@ -33,8 +34,12 @@ public:
 	const char* getContrasena() const;
 	void setContrasena(const char*);
 	const char* getRol() const;
+    std::string obtenerTexto(sqlite3_stmt *stmt, int columna) const;
     void setRol(const char *);
 
+    void consultarDatosUsuario() const;
+	void consultarTodosLosUsuarios() const;
+    void guardarDatosUsuarioEnTXT() const;
 };
 
 #endif /* USUARIO_H_ */
