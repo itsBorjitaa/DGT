@@ -16,10 +16,8 @@
 #define MAX_BUFFER 1024
 #define MAX_CLIENTS 10
 
-// Base de datos global
 sqlite3 *db;
 
-// Estructura para manejar información del cliente
 typedef struct {
     SOCKET socket;
     struct sockaddr_in address;
@@ -27,7 +25,6 @@ typedef struct {
     int port;
 } ClientInfo;
 
-// Funciones de base de datos
 void inicializarDB() {
     int rc = sqlite3_open("db.db", &db);
     if (rc) {
@@ -35,7 +32,6 @@ void inicializarDB() {
         exit(1);
     }
     
-    // Crear tabla de usuarios
     char *sql_usuarios = "CREATE TABLE IF NOT EXISTS usuarios ("
                         "usuario TEXT PRIMARY KEY, "
                         "contrasena TEXT, "
@@ -48,7 +44,6 @@ void inicializarDB() {
                         ");";
     sqlite3_exec(db, sql_usuarios, 0, 0, 0);
     
-    // Crear tabla de vehículos
     char *sql_vehiculos = "CREATE TABLE IF NOT EXISTS vehiculos ("
                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                          "usuario TEXT, "
@@ -62,7 +57,6 @@ void inicializarDB() {
                          ");";
     sqlite3_exec(db, sql_vehiculos, 0, 0, 0);
     
-    // Crear tabla de multas
     char *sql_multas = "CREATE TABLE IF NOT EXISTS multas ("
                       "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                       "dni TEXT, "
@@ -76,7 +70,6 @@ void inicializarDB() {
                       ");";
     sqlite3_exec(db, sql_multas, 0, 0, 0);
     
-    // Crear tabla de accidentes
     char *sql_accidentes = "CREATE TABLE IF NOT EXISTS accidentes ("
                           "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                           "usuario TEXT, "
@@ -86,7 +79,6 @@ void inicializarDB() {
                           ");";
     sqlite3_exec(db, sql_accidentes, 0, 0, 0);
     
-    // Insertar admin por defecto
     char *sql_admin = "INSERT OR IGNORE INTO usuarios (usuario, contrasena, rol, nombre, apellidos, dni, email, telefono) "
                      "VALUES ('admin', 'admin123', 'admin', 'Administrador', 'Sistema', '00000000A', 'admin@dgt.es', '000000000');";
     sqlite3_exec(db, sql_admin, 0, 0, 0);
@@ -94,7 +86,7 @@ void inicializarDB() {
     printf("Base de datos inicializada correctamente\n");
 }
 
-// Función para obtener la IP del cliente
+//obtener la IP del cliente
 void getClientIP(struct sockaddr_in *client_addr, char *ip_str) {
     char* ip_temp = inet_ntoa(client_addr->sin_addr);
     if (ip_temp != NULL) {
@@ -105,14 +97,14 @@ void getClientIP(struct sockaddr_in *client_addr, char *ip_str) {
     }
 }
 
-// Función para obtener fecha actual
+//obtener fecha actual
 void obtenerFechaActual(char* fecha) {
     time_t t = time(NULL);
     struct tm *tm_info = localtime(&t);
     strftime(fecha, 20, "%Y-%m-%d", tm_info);
 }
 
-// Función para verificar credenciales
+//verificar credenciales
 int verificarCredenciales(const char* usuario, const char* contrasena, char* rol) {
     char sql[300];
     sprintf(sql, "SELECT rol FROM usuarios WHERE usuario='%s' AND contrasena='%s'", usuario, contrasena);
@@ -132,7 +124,7 @@ int verificarCredenciales(const char* usuario, const char* contrasena, char* rol
     return resultado;
 }
 
-// Función para registrar usuario
+//registrar usuario
 int registrarUsuario(const char* usuario, const char* contrasena, const char* rol, 
                     const char* nombre, const char* apellidos, const char* dni, 
                     const char* email, const char* telefono) {
@@ -144,7 +136,7 @@ int registrarUsuario(const char* usuario, const char* contrasena, const char* ro
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
-// Función para consultar datos de usuario
+//consultar datos de usuario
 void consultarDatosUsuario(const char* usuario, char* response) {
     char sql[300];
     sprintf(sql, "SELECT nombre, apellidos, dni, email, telefono FROM usuarios WHERE usuario='%s'", usuario);
@@ -167,7 +159,6 @@ void consultarDatosUsuario(const char* usuario, char* response) {
     sqlite3_finalize(stmt);
 }
 
-// Función para consultar vehículos de usuario
 char* consultarVehiculosUsuario(const char* usuario) {
     char sql[300];
     sprintf(sql, "SELECT matricula, marca, modelo, anio, color, tipo_vehiculo FROM vehiculos WHERE usuario='%s'", usuario);
@@ -220,7 +211,7 @@ char* consultarVehiculosUsuario(const char* usuario) {
 }
 
 
-// Función para consultar multas de usuario
+//consultar multas de usuario
 void consultarMultasUsuario(const char* usuario, char* response) {
     char sql[400];
     sprintf(sql, "SELECT m.id, m.concepto, m.fecha_delito, m.importe, m.fecha_limite_descuento, m.pagada "
@@ -251,7 +242,6 @@ void consultarMultasUsuario(const char* usuario, char* response) {
     sqlite3_finalize(stmt);
 }
 
-// Función para agregar accidente
 int agregarAccidente(const char* usuario, const char* descripcion) {
     char fecha[20];
     obtenerFechaActual(fecha);
@@ -263,7 +253,6 @@ int agregarAccidente(const char* usuario, const char* descripcion) {
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
-// Función para consultar accidentes de usuario
 void consultarAccidentesUsuario(const char* usuario, char* response) {
     char sql[300];
     sprintf(sql, "SELECT id, fecha, descripcion FROM accidentes WHERE usuario='%s'", usuario);
@@ -324,7 +313,6 @@ void consultarAccidentePorId(int id_accidente, char* response) {
     sqlite3_finalize(stmt);
 }
 
-// Función para consultar todos los usuarios (admin)
 void consultarTodosUsuarios(char* response) {
     char sql[] = "SELECT usuario, nombre, apellidos, dni, email, telefono FROM usuarios";
     
@@ -347,7 +335,6 @@ void consultarTodosUsuarios(char* response) {
     sqlite3_finalize(stmt);
 }
 
-// Función para consultar todos los vehículos (admin)
 void consultarTodosVehiculos(char* response) {
     char sql[] = "SELECT v.usuario, v.matricula, v.marca, v.modelo, v.anio, v.color, v.tipo_vehiculo FROM vehiculos v";
     
@@ -371,7 +358,6 @@ void consultarTodosVehiculos(char* response) {
     sqlite3_finalize(stmt);
 }
 
-// Función para consultar todas las multas (admin)
 void consultarTodasMultas(char* response) {
     char sql[] = "SELECT id, dni, concepto, fecha_delito, importe, fecha_limite_descuento, pagada FROM multas";
     
@@ -395,7 +381,6 @@ void consultarTodasMultas(char* response) {
     sqlite3_finalize(stmt);
 }
 
-// Función para agregar vehículo
 int agregarVehiculo(const char* usuario, const char* matricula, const char* marca, 
                    const char* modelo, int anio, const char* color, const char* tipo) {
     char sql[500];
@@ -406,7 +391,6 @@ int agregarVehiculo(const char* usuario, const char* matricula, const char* marc
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
-// Modificar vehículo por matrícula
 int modificarVehiculo(const char* usuario, const char* matricula, const char* marca, 
                      const char* modelo, int anio, const char* color, const char* tipo) {
     char sql[600];
@@ -416,14 +400,12 @@ int modificarVehiculo(const char* usuario, const char* matricula, const char* ma
     
     int result = sqlite3_exec(db, sql, 0, 0, 0);
     
-    // Verificar si se modificó alguna fila
     if (result == SQLITE_OK && sqlite3_changes(db) > 0) {
         return 1;
     }
     return 0;
 }
 
-// Obtener datos de un vehículo específico
 void obtenerDatosVehiculo(const char* usuario, const char* matricula, char* response) {
     char sql[400];
     sprintf(sql, "SELECT matricula, marca, modelo, anio, color, tipo_vehiculo "
@@ -454,7 +436,6 @@ void obtenerDatosVehiculo(const char* usuario, const char* matricula, char* resp
     sqlite3_finalize(stmt);
 }
 
-//Función para guardar datos del usuario en un archivo TXT
 void guardarDatosUsuarioEnTXT(const char* usuario, const char* nombreArchivo) {
 
     char nombreArchivoCompleto[120];
@@ -553,7 +534,6 @@ void guardarDatosUsuarioEnTXT(const char* usuario, const char* nombreArchivo) {
   fclose(archivo);
 }
 
-// Función para agregar multa (admin)
 int agregarMulta(const char* dni, const char* concepto, const char* fecha_delito, 
                 double importe, const char* fecha_limite) {
     char sql[500];
@@ -564,7 +544,6 @@ int agregarMulta(const char* dni, const char* concepto, const char* fecha_delito
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
-// Función para pagar multa
 int pagarMulta(const char* usuario, int id_multa) {
     char fecha[20];
     obtenerFechaActual(fecha);
@@ -576,7 +555,6 @@ int pagarMulta(const char* usuario, int id_multa) {
     return sqlite3_exec(db, sql, 0, 0, 0) == SQLITE_OK;
 }
 
-// Función para cambiar el estado de una multa (admin)
 void cambiarEstadoMulta() {
     int id_multa;
     char usuario[50]; 
@@ -620,7 +598,6 @@ void cambiarEstadoMulta() {
     }
 }
 
-// Función principal para procesar mensajes del cliente
 void processClientMessage(const char* message, char* response, size_t response_size) {
     char *token;
     char message_copy[MAX_BUFFER];
@@ -953,23 +930,19 @@ int main() {
     printf("=== SERVIDOR DGT ===\n");
     printf("Iniciando servidor en puerto %d...\n", PORT);
     
-    // Inicializar base de datos
     inicializarDB();
     
-    // Inicializar Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         printf("Error al inicializar Winsock\n");
         return -1;
     }
     
-    // Crear socket del servidor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
         printf("Error al crear socket: %d\n", WSAGetLastError());
         WSACleanup();
         return -1;
     }
     
-    // Configurar opciones del socket
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) == SOCKET_ERROR) {
         printf("Error en setsockopt: %d\n", WSAGetLastError());
         closesocket(server_fd);
@@ -980,8 +953,7 @@ int main() {
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
-    
-    // Bind del socket
+
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) == SOCKET_ERROR) {
         printf("Error en bind: %d\n", WSAGetLastError());
         closesocket(server_fd);
@@ -989,7 +961,6 @@ int main() {
         return -1;
     }
     
-    // Escuchar conexiones
     if (listen(server_fd, MAX_CLIENTS) == SOCKET_ERROR) {
         printf("Error en listen: %d\n", WSAGetLastError());
         closesocket(server_fd);
@@ -1000,7 +971,6 @@ int main() {
     printf("Servidor escuchando en puerto %d\n", PORT);
     printf("Esperando conexiones de clientes...\n\n");
     
-    // Loop principal del servidor
     while (1) {
         struct sockaddr_in client_addr;
         int client_len = sizeof(client_addr);
@@ -1011,14 +981,12 @@ int main() {
             continue;
         }
         
-        // Crear estructura para el cliente
         ClientInfo *client = malloc(sizeof(ClientInfo));
         client->socket = new_socket;
         client->address = client_addr;
         client->port = ntohs(client_addr.sin_port);
         getClientIP(&client_addr, client->ip);
         
-        // Crear hilo para manejar el cliente
         HANDLE thread = CreateThread(NULL, 0, handleClient, client, 0, NULL);
         if (thread == NULL) {
             printf("Error creando hilo para cliente\n");
@@ -1028,8 +996,7 @@ int main() {
             CloseHandle(thread);
         }
     }
-    
-    // Limpieza
+
     closesocket(server_fd);
     sqlite3_close(db);
     WSACleanup();

@@ -1,0 +1,37 @@
+----- DATOS PERSONALES -----
+Nombre: Juan
+Apellidos: Garcia
+DNI: 12345678A
+Email: juangarcia@prueba.com
+Teléfono: 111222333
+
+----- VEHÍCULOS REGISTRADOS -----
+Matrícula: 1234ABC
+Marca: BMW
+Modelo: Serie 3 E46 330Ci
+Año: 2003
+Color: Negro
+Tipo: coche
+
+----- MULTAS -----
+ID: 1
+Concepto: Velocidad Excesiva
+Fecha Delito: 2025-03-06
+Importe: 120.00€
+Límite Descuento: 2025-03-16
+Pagada: Sí
+
+ID: 2
+Concepto: Saltarse semaforo en rojo
+Fecha Delito: 2025-03-31
+Importe: 30.00€
+Límite Descuento: 2025-04-15
+Pagada: Sí
+
+----- ACCIDENTES -----
+Fecha: 2020-12-25
+Descripción: Alcance
+
+Fecha: 2025-05-30
+Descripción: Atropello masivo
+

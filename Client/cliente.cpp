@@ -8,7 +8,7 @@
 #include "multa.h"
 #include "accidente.h"
 
-// para ejecutar: g++ -o cliente.exe cliente.cpp -lws2_32
+// para ejecutar: g++ -o cliente.exe cliente.cpp usuario.cpp vehiculo.cpp multa.cpp accidente.cpp -lws2_32
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -91,7 +91,6 @@ int enviarMensaje(SOCKET sock, const char* mensaje) {
     return 0;
 }
 
-// Función para manejar login
 int manejarLogin(SOCKET sock) {
     char usuario[50], contrasena[50];
     char mensaje[MAX_BUFFER];
@@ -112,7 +111,6 @@ int manejarLogin(SOCKET sock) {
         return 0;
     }
     
-    // Recibir respuesta
     char buffer[MAX_BUFFER] = {0};
     int valread = recv(sock, buffer, MAX_BUFFER - 1, 0);
     if (valread <= 0) {
@@ -122,9 +120,7 @@ int manejarLogin(SOCKET sock) {
     
     buffer[valread] = '\0';
     
-    // Procesar respuesta
     if (strncmp(buffer, "LOGIN_OK:", 9) == 0) {
-        // Extraer rol de la respuesta
         strcpy(rolActual, buffer + 9);
         usuarioActual->setUsuario(usuario);
         sesionActiva = 1;
@@ -136,7 +132,6 @@ int manejarLogin(SOCKET sock) {
     }
 }
 
-// Función para manejar registro
 int manejarRegistro(SOCKET sock) {
     char usuario[50], contrasena[50], nombre[100], apellidos[100];
     char dni[20], email[100], telefono[20], rol[20];
@@ -179,18 +174,15 @@ int manejarRegistro(SOCKET sock) {
         }
     } while (tipoRol != 0 && tipoRol != 1);
 
-    // Crear mensaje de registro
     snprintf(mensaje, sizeof(mensaje), "REGISTER:%s:%s:%s:%s:%s:%s:%s:%s", 
              usuario, contrasena, rol, nombre, apellidos, dni, email, telefono);
 
-    // Enviar mensaje
     int send_result = send(sock, mensaje, (int)strlen(mensaje), 0);
     if (send_result == SOCKET_ERROR) {
         std::cout << "Error enviando mensaje de registro: " << WSAGetLastError() << std::endl;
         return 0;
     }
 
-    // Recibir respuesta
     char buffer[MAX_BUFFER] = {0};
     int valread = recv(sock, buffer, MAX_BUFFER - 1, 0);
     if (valread <= 0) {
@@ -204,7 +196,25 @@ int manejarRegistro(SOCKET sock) {
     return (strncmp(buffer, "REGISTER_OK", 11) == 0);
 }
 
-// Función para manejar comandos de usuario
+void mostrarEstadosMulta() {
+    std::cout << "\nEstados disponibles:\n";
+    std::cout << "1. PENDIENTE\n";
+    std::cout << "2. PAGADA\n";
+    std::cout << "3. ANULADA\n";
+    std::cout << "4. VENCIDA\n";
+    std::cout << "Seleccione el nuevo estado: ";
+}
+
+const char* obtenerTextoEstado(int opcionEstado) {
+    switch(opcionEstado) {
+        case 1: return "PENDIENTE";
+        case 2: return "PAGADA";
+        case 3: return "ANULADA";
+        case 4: return "VENCIDA";
+        default: return "PENDIENTE";
+    }
+}
+
 void manejarComandosUsuario(SOCKET sock) {
     int opcion;
     char mensaje[MAX_BUFFER];
@@ -265,7 +275,7 @@ void manejarComandosUsuario(SOCKET sock) {
                 break;
 
             case 9:
-                // Proceso de modificación del vehículo
+                std::cout << "Funcionalidad de modificar vehiculo en desarrollo...\n";
                 break;
 
             case 0:
@@ -282,11 +292,12 @@ void manejarComandosUsuario(SOCKET sock) {
     } while (opcion != 0);
 }
 
-// Función para manejar comandos de administrador
 void manejarComandosAdmin(SOCKET sock) {
     int opcion;
     char mensaje[MAX_BUFFER];
     char input[500];
+    char idMulta[50];
+    int opcionEstado;
 
     do {
         mostrarMenuAdmin();
@@ -314,7 +325,44 @@ void manejarComandosAdmin(SOCKET sock) {
                 break;
 
             case 5:
-                // Proceso para cambiar estado de multa
+                {  // Add braces to create a new scope
+                    std::cout << "\n--- Cambiar Estado de Multa ---\n";
+                    
+                    std::cout << "Mostrando todas las multas para referencia:\n";
+                    enviarMensaje(sock, "ADMIN_ALL_FINES");
+                    
+                    std::cout << "\nIngrese el ID de la multa a modificar: ";
+                    std::cin.getline(idMulta, sizeof(idMulta));
+                    
+                    if (strlen(idMulta) == 0) {
+                        std::cout << "Error: Debe ingresar un ID de multa válido.\n";
+                        break;
+                    }
+                    
+                    mostrarEstadosMulta();
+                    std::cin >> opcionEstado;
+                    std::cin.ignore(); // Limpiar buffer
+                    
+                    if (opcionEstado < 1 || opcionEstado > 4) {
+                        std::cout << "Error: Opción de estado no válida.\n";
+                        break;
+                    }
+                    
+                    const char* nuevoEstado = obtenerTextoEstado(opcionEstado);
+
+                    std::cout << "\n¿Confirma el cambio de estado de la multa ID " << idMulta 
+                             << " a " << nuevoEstado << "? (s/n): ";
+                    char confirmacion;
+                    std::cin >> confirmacion;
+                    std::cin.ignore();
+                    
+                    if (confirmacion == 's' || confirmacion == 'S') {
+                        snprintf(mensaje, sizeof(mensaje), "CHANGE_FINE_STATUS:%s:%s", idMulta, nuevoEstado);
+                        enviarMensaje(sock, mensaje);
+                    } else {
+                        std::cout << "Operación cancelada.\n";
+                    }
+                }  // Close the scope
                 break;
 
             case 6:
@@ -372,7 +420,6 @@ int main() {
         return -1;
     }
 
-    // Conectar al servidor
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
         std::cout << "Fallo al conectar: " << WSAGetLastError() << std::endl;
         std::cout << "Asegurate de que el servidor esté ejecutándose" << std::endl;
@@ -383,10 +430,8 @@ int main() {
 
     std::cout << "Conectado al servidor exitosamente!\n";
 
-    // Loop principal del cliente
     while (1) {
         if (!sesionActiva) {
-            // Menú inicial - sin sesión activa
             mostrarMenuInicial();
             int opcion;
             std::cin >> opcion;
@@ -420,7 +465,6 @@ int main() {
                     break;
             }
         } else {
-            // Menú según el rol del usuario
             if (strcmp(rolActual, "usuario") == 0) {
                 manejarComandosUsuario(sock);
             } else if (strcmp(rolActual, "admin") == 0) {
@@ -430,8 +474,8 @@ int main() {
     }
 
 cleanup:
-    delete usuarioActual; // Liberar memoria asignada al objeto `usuarioActual`
-    delete[] rolActual;    // Liberar memoria asignada al rol
+    delete usuarioActual;
+    delete[] rolActual;   
 
     closesocket(sock);
     WSACleanup();
