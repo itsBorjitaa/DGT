@@ -324,46 +324,45 @@ void manejarComandosAdmin(SOCKET sock) {
                 enviarMensaje(sock, mensaje);
                 break;
 
-            case 5:
-                {  // Add braces to create a new scope
-                    std::cout << "\n--- Cambiar Estado de Multa ---\n";
-                    
-                    std::cout << "Mostrando todas las multas para referencia:\n";
-                    enviarMensaje(sock, "ADMIN_ALL_FINES");
-                    
-                    std::cout << "\nIngrese el ID de la multa a modificar: ";
-                    std::cin.getline(idMulta, sizeof(idMulta));
-                    
-                    if (strlen(idMulta) == 0) {
-                        std::cout << "Error: Debe ingresar un ID de multa válido.\n";
-                        break;
-                    }
-                    
-                    mostrarEstadosMulta();
-                    std::cin >> opcionEstado;
-                    std::cin.ignore(); // Limpiar buffer
-                    
-                    if (opcionEstado < 1 || opcionEstado > 4) {
-                        std::cout << "Error: Opción de estado no válida.\n";
-                        break;
-                    }
-                    
-                    const char* nuevoEstado = obtenerTextoEstado(opcionEstado);
+            case 5: {
+                std::string input;
+                int id_multa;
 
-                    std::cout << "\n¿Confirma el cambio de estado de la multa ID " << idMulta 
-                             << " a " << nuevoEstado << "? (s/n): ";
-                    char confirmacion;
-                    std::cin >> confirmacion;
-                    std::cin.ignore();
-                    
-                    if (confirmacion == 's' || confirmacion == 'S') {
-                        snprintf(mensaje, sizeof(mensaje), "CHANGE_FINE_STATUS:%s:%s", idMulta, nuevoEstado);
-                        enviarMensaje(sock, mensaje);
-                    } else {
-                        std::cout << "Operación cancelada.\n";
-                    }
-                }  // Close the scope
+                std::cout << "Ingrese ID de la multa a actualizar: ";
+                std::getline(std::cin, input);
+                id_multa = std::stoi(input);
+
+                char mensaje[MAX_BUFFER];
+                snprintf(mensaje, sizeof(mensaje), "CHECK_FINE_EXISTS:%d", id_multa);
+
+                char respuesta[MAX_BUFFER] = {0};
+
+                int send_result = send(sock, mensaje, (int)strlen(mensaje), 0);
+                if (send_result == SOCKET_ERROR) {
+                    std::cerr << "Error enviando mensaje: " << WSAGetLastError() << "\n";
+                    break;
+                }
+
+                int valread = recv(sock, respuesta, MAX_BUFFER - 1, 0);
+                if (valread <= 0) {
+                    std::cerr << "Error recibiendo respuesta o conexión cerrada.\n";
+                    break;
+                }
+                respuesta[valread] = '\0';
+
+                if (strncmp(respuesta, "OK", 2) == 0) {
+                    std::cout << "Ingrese nuevo estado (1 = pagada, 0 = no pagada): ";
+                    std::getline(std::cin, input);
+                    int nuevo_estado = std::stoi(input);
+
+                    snprintf(mensaje, sizeof(mensaje), "UPDATE_FINE_STATE:%d:%d", id_multa, nuevo_estado);
+                    enviarMensaje(sock, mensaje); 
+                } else {
+                    std::cout << "Respuesta del servidor:\n" << respuesta << "\n";
+                }
+
                 break;
+            }
 
             case 6:
                 std::cout << "Ingrese ID del accidente: ";
