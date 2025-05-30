@@ -1,6 +1,7 @@
 #ifndef USUARIO_H
 #define USUARIO_H
 
+#include <sqlite3.h>
 class Usuario
 {
 private:
@@ -18,24 +19,25 @@ public:
 	//Usuario(const Usuario&);      // NO QUEREMOS QUE SE PUEDA COPIAR UN USUARIO
 	~Usuario();
 
-	char* getNombre() const;
+	const char* getNombre() const;
 	void setNombre(const char*);
-	char* getApellidos() const;
+	const char* getApellidos() const;
 	void setApellidos(const char*);
-	char* getDni() const;
+	const char* getDni() const;
 	void setDni(const char*);
-	char* getEmail() const;
+	const char* getEmail() const;
 	void setEmail(const char*);
-	char* getTelefono() const;
+	const char* getTelefono() const;
 	void setTelefono(const char*);
-	char* getUsuario() const;
+	const char* getUsuario() const;
 	void setUsuario(const char*);
-	char* getContrasena() const;
+	const char* getContrasena() const;
 	void setContrasena(const char*);
-	char* getRol() const;
-	void setRol(const char*);
+	const char* getRol() const;
+    std::string obtenerTexto(sqlite3_stmt *stmt, int columna) const;
+    void setRol(const char *);
 
-	void consultarDatosUsuario() const;
+    void consultarDatosUsuario() const;
 	void consultarTodosLosUsuarios() const;
     void guardarDatosUsuarioEnTXT() const;
 };
