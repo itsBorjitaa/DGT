@@ -20,12 +20,6 @@ public:
 	char* getDescripcion() const;
 	void setDescripcion(const char*);
 
-    void consultarDatosAccidente(int idAccidente) const;
-	void consultarAccidentesUsuario(char *usuario) const;
-	int obtenerAnioActual() const;
-    int esAnioBisiesto(int anio) const;
-    int validarFecha(const char *fecha) const;
-    void registrarAccidenteConValidacion() const;
 };
 
 #endif /* ACCIDENTE_H_ */
