@@ -16,13 +16,11 @@
 #define MAX_BUFFER 1024
 #define SERVER_IP "127.0.0.1"  // localhost
 
-// Variables globales para sesión
 Usuario* usuarioActual = new Usuario();
 char* rolActual = new char[10]{};
 int sesionActiva = 0;
 char nombreArchivo[100] = "";  
 
-// Función para mostrar el menú inicial
 void mostrarMenuInicial() {
     std::cout << "\n=== CLIENTE DGT ===\n";
     std::cout << "1. Iniciar sesion\n";
@@ -33,7 +31,6 @@ void mostrarMenuInicial() {
     std::cout << "Seleccione una opcion: ";
 }
 
-// Función para mostrar el menú de usuario
 void mostrarMenuUsuario() {
     std::cout << "\n=== MENU USUARIO ===\n";
     std::cout << "Usuario: " << usuarioActual->getUsuario() << std::endl;
@@ -50,7 +47,6 @@ void mostrarMenuUsuario() {
     std::cout << "Seleccione una opcion: ";
 }
 
-// Función para mostrar el menú de administrador
 void mostrarMenuAdmin() {
     std::cout << "\n=== MENU ADMINISTRADOR ===\n";
     std::cout << "Usuario: " << usuarioActual->getUsuario() << std::endl;
@@ -64,16 +60,13 @@ void mostrarMenuAdmin() {
     std::cout << "Seleccione una opcion: ";
 }
 
-// Función para enviar mensaje y recibir respuesta
 int enviarMensaje(SOCKET sock, const char* mensaje) {
-    // Enviar mensaje
     int send_result = send(sock, mensaje, (int)strlen(mensaje), 0);
     if (send_result == SOCKET_ERROR) {
         std::cout << "Error enviando mensaje: " << WSAGetLastError() << std::endl;
         return -1;
     }
     
-    // Recibir respuesta
     char buffer[MAX_BUFFER] = {0};
     int valread = recv(sock, buffer, MAX_BUFFER - 1, 0);
     if (valread == SOCKET_ERROR) {
@@ -101,10 +94,8 @@ int manejarLogin(SOCKET sock) {
     std::cout << "Contrasena: ";
     std::cin >> contrasena;
     
-    // Crear mensaje de login
     snprintf(mensaje, sizeof(mensaje), "LOGIN:%s:%s", usuario, contrasena);
     
-    // Enviar mensaje
     int send_result = send(sock, mensaje, (int)strlen(mensaje), 0);
     if (send_result == SOCKET_ERROR) {
         std::cout << "Error enviando mensaje de login: " << WSAGetLastError() << std::endl;
@@ -281,24 +272,29 @@ void manejarComandosUsuario(SOCKET sock) {
                 std::cout << "Ingrese matricula del vehiculo a modificar: ";
                 std::getline(std::cin, matricula);
 
+                // Primer mensaje: solicitar datos del vehículo
                 char mensaje[MAX_BUFFER];
-                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE:%s:%s", usuarioActual, matricula.c_str());
+                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE:%s:%s", usuarioActual->getUsuario(), matricula.c_str());
+                
                 if (enviarMensaje(sock, mensaje) == -1) {
-                std::cerr << "Error comunicándose con el servidor.\n";
-                break;
-            }
+                    std::cerr << "Error comunicándose con el servidor.\n";
+                    break;
+                }
 
                 std::cout << "Introduce los nuevos datos separados por coma (marca,modelo,anio,color,tipo): ";
                 std::getline(std::cin, nuevosDatos);
 
-                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE_DATA:%s:%s:%s", usuarioActual, matricula.c_str(), nuevosDatos.c_str());
+                // Segundo mensaje: enviar los nuevos datos
+                snprintf(mensaje, sizeof(mensaje), "MODIFY_VEHICLE_DATA:%s:%s:%s", 
+                        usuarioActual->getUsuario(), matricula.c_str(), nuevosDatos.c_str());
+                
                 if (enviarMensaje(sock, mensaje) == -1) {
                     std::cerr << "Error comunicándose con el servidor.\n";
                     break;
                 }
 
                 break;
-        }
+            }
 
             case 0:
                 std::cout << "Cerrando sesion...\n";
@@ -415,13 +411,11 @@ int main() {
     std::cout << "=== CLIENTE DGT ===\n";
     std::cout << "Conectando al servidor " << SERVER_IP << ":" << PORT << std::endl;
 
-    // Inicializar Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cout << "Error al inicializar Winsock" << std::endl;
         return -1;
     }
 
-    // Crear socket
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock == INVALID_SOCKET) {
         std::cout << "Error creando socket: " << WSAGetLastError() << std::endl;
@@ -429,7 +423,6 @@ int main() {
         return -1;
     }
 
-    // Configurar dirección del servidor
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
     serv_addr.sin_addr.s_addr = inet_addr(SERVER_IP);

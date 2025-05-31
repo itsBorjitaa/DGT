@@ -86,7 +86,6 @@ void inicializarDB() {
     printf("Base de datos inicializada correctamente\n");
 }
 
-//obtener la IP del cliente
 void getClientIP(struct sockaddr_in *client_addr, char *ip_str) {
     char* ip_temp = inet_ntoa(client_addr->sin_addr);
     if (ip_temp != NULL) {
@@ -97,14 +96,12 @@ void getClientIP(struct sockaddr_in *client_addr, char *ip_str) {
     }
 }
 
-//obtener fecha actual
 void obtenerFechaActual(char* fecha) {
     time_t t = time(NULL);
     struct tm *tm_info = localtime(&t);
     strftime(fecha, 20, "%Y-%m-%d", tm_info);
 }
 
-//verificar credenciales
 int verificarCredenciales(const char* usuario, const char* contrasena, char* rol) {
     char sql[300];
     sprintf(sql, "SELECT rol FROM usuarios WHERE usuario='%s' AND contrasena='%s'", usuario, contrasena);
@@ -211,7 +208,6 @@ char* consultarVehiculosUsuario(const char* usuario) {
 }
 
 
-//consultar multas de usuario
 void consultarMultasUsuario(const char* usuario, char* response) {
     char sql[400];
     sprintf(sql, "SELECT m.id, m.concepto, m.fecha_delito, m.importe, m.fecha_limite_descuento, m.pagada "
